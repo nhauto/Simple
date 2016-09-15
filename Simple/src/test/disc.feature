@@ -44,17 +44,6 @@ When I click on class "form__row form__row--limestone form__custom-check"
 When I click on element with id "summary_form_corporate_terms"
 When I click on button name "commit"
 Then I wait
-When I click on button name "VISA_brand"
-When I fill "cardname" with "xyz"
-When I fill "cardnumber" with "4111111111111111"
-When I select item "2" in menu "Ecom_Payment_Card_ExpDate_Month"
-When I select item "2" in menu "Ecom_Payment_Card_ExpDate_Year"
-When I fill "cardyear" with "2017"
-When I fill "cardcvs" with "737"
-#Then I wait
-When I click on button name "payment"
-Then I wait for order id
-#Then I wait
 Given I navigate to salesforce
 When I enter Login and Password
 #Then I wait

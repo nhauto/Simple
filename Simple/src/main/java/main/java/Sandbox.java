@@ -39,7 +39,7 @@ public class Sandbox {
 		{
 			
 			salesforce = "https://nuffieldhealth-crm--crmuat.cs87.my.salesforce.com/";
-			waf = "https://payments.nuffield.uat.fridayengineering.net/join/stoke-poges";
+			waf = "https://payments.nuffield.uat.fridayengineering.net/join/bolton";
 			login = "max.karpov@nuffieldhealth.com.crmuat";
 			password = "topor345";		
 			

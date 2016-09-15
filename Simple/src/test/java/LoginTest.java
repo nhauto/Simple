@@ -75,7 +75,7 @@ public class LoginTest {
 	@Before
 	public void setup() throws Exception 
 	{
-		File pathBinary=new File("C:\\Documents and Settings\\maxkarpov\\Local Settings\\Application Data\\Mozilla Firefox\\firefox.exe");
+		File pathBinary=new File("C:\\NB\firefox-sdk\bin\firefox.exe");
 		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
 		FirefoxProfile fprofile=new FirefoxProfile();
 		
@@ -88,7 +88,7 @@ public class LoginTest {
 	@Given("^I open the test instance of salesforce$")
 	public void i_open_the_test_instance_of_salesforce()  {
 
-		File pathBinary=new File("C:/Program Files (x86)/Mozilla Firefox/firefox.exe");
+		File pathBinary=new File("C:\\NB\firefox-sdk\bin\firefox.exe");
 		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
 		FirefoxProfile fprofile=new FirefoxProfile();
 		
@@ -130,7 +130,7 @@ public class LoginTest {
 		
 		
 		
-		File pathBinary=new File("C:/Program Files (x86)/Mozilla Firefox/firefox.exe");
+		File pathBinary=new File("C:\\NB\\firefox-sdk\\bin\\firefox.exe");
 		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
 		FirefoxProfile fprofile=new FirefoxProfile();
 	//	fprofile.setPreference("dom.forms.number", false);
@@ -484,19 +484,48 @@ public class LoginTest {
 		dv = driver.findElements(By.tagName("div"));
 		
 		WebElement row = null;
-		
-		for(int i = 0; i<dv.size(); i++)
+		if(orid.length()>1)
 		{
-			String cnt = dv.get(i).getText();
-			
-			if(cnt.equals(orid))
+			for(int i = 0; i<dv.size(); i++)
 			{
-			row = dv.get(i);
-		    break;
+				String cnt = dv.get(i).getText();
 				
-			}
-			
+				if(cnt.equals(orid))
+				{
+				row = dv.get(i);
+			    break;
+					
+				}
+				
+			}			
+		}else
+		{
+			int ordi = 0;
+			for(int i = 0; i<dv.size(); i++)
+			{
+				String cnt = dv.get(i).getText();
+				int cint = 0;
+				try
+				{
+					cint = Integer.parseInt(cnt);
+					
+				}
+				catch(Exception xx)
+				{
+					
+				}
+				
+				if(cint>ordi)
+				{
+				row = null;
+				row = dv.get(i);
+			    ordi =cint;
+					
+				}
+				
+			}			
 		}
+
 		
 		WebElement td = row.findElement(By.xpath("parent::*"));
 		
