@@ -500,14 +500,20 @@ public class LoginTest {
 			}			
 		}else
 		{
-			int ordi = 0;
+			long ordi = 0;
 			for(int i = 0; i<dv.size(); i++)
 			{
 				String cnt = dv.get(i).getText();
-				int cint = 0;
+				
+				if(cnt.indexOf("63100000019") == 0)
+				{
+					System.out.println(cnt);
+				}
+				
+				long cint = 0;
 				try
 				{
-					cint = Integer.parseInt(cnt);
+					cint = Long.parseLong(cnt);
 					
 				}
 				catch(Exception xx)
