@@ -25,6 +25,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 
+import cucumber.api.Scenario;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -66,7 +67,7 @@ public class LoginTest {
 	protected String payref="";
 	protected String[] vles = {"Next","Set up Direct Debit", "Proceed to payment","VISA_brand"};
 	protected String[] amounts={total,membership,fee,prorata,monthly};
-	
+	public Scenario scenario;
 	public enum page
 	{
 		salesforce,vione,waf
@@ -84,6 +85,14 @@ public class LoginTest {
 		wait=new WebDriverWait(driver,30);		
 	}
 
+	@Before
+	public void before(Scenario scenario) {
+	    this.scenario = scenario;
+	    
+	    System.out.println(this.scenario.getName());
+	}
+	
+	
 	
 	@Given("^I open the test instance of salesforce$")
 	public void i_open_the_test_instance_of_salesforce()  {
@@ -1187,7 +1196,7 @@ Date date = new Date();
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		System.out.println("TEST COMPLETED: "+scenario.getName());
 		driver.close();
 	}
 	
