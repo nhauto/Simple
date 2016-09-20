@@ -12,11 +12,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
+import cucumber.api.java.Before;
 import org.openqa.selenium.Cookie;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.Before;
+ 
 
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -41,7 +41,7 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
+ 
  
 
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -68,30 +68,35 @@ public class LoginTest {
 	protected String[] vles = {"Next","Set up Direct Debit", "Proceed to payment","VISA_brand"};
 	protected String[] amounts={total,membership,fee,prorata,monthly};
 	public Scenario scenario;
+	
 	public enum page
 	{
 		salesforce,vione,waf
 	}
 	
-	@Before
-	public void setup() throws Exception 
-	{
-		File pathBinary=new File("C:\\NB\firefox-sdk\bin\firefox.exe");
-		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
-		FirefoxProfile fprofile=new FirefoxProfile();
+//	@Before
+//	public void setup() throws Exception 
+//	{
+//		File pathBinary=new File("C:\\NB\firefox-sdk\bin\firefox.exe");
+//		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
+	//	FirefoxProfile fprofile=new FirefoxProfile();
 		
-		driver=new FirefoxDriver(Binary,fprofile);
+	//	driver=new FirefoxDriver(Binary,fprofile);
 		
-		wait=new WebDriverWait(driver,30);		
-	}
+//		wait=new WebDriverWait(driver,30);		
+	//}
+
 
 	@Before
-	public void before(Scenario scenario) {
-	    this.scenario = scenario;
+	public void before(
+			Scenario scenario
+			) 
+	{
+	   
+		this.scenario = scenario;
 	    
-	    System.out.println(this.scenario.getName());
+	   
 	}
-	
 	
 	
 	@Given("^I open the test instance of salesforce$")
@@ -111,6 +116,8 @@ public class LoginTest {
 	
 	@Given("^I open the page \"([^\"]*)\"$")
 	public void i_open_the_page(String st)  {
+
+
 
 		page pg=page.valueOf(st);
 		String path="";
@@ -1151,7 +1158,7 @@ Date date = new Date();
 	public void Then_I_do_save()
 	{
 		String[] temp=new String[10];
-		
+		 
 		String url = driver.getCurrentUrl();
 		
 		String id=url.substring(Cred.salesforce.length());
