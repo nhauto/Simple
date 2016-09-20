@@ -88,9 +88,7 @@ public class LoginTest {
 
 
 	@Before
-	public void before(
-			Scenario scenario
-			) 
+	public void before(Scenario scenario) 
 	{
 	   
 		this.scenario = scenario;
@@ -118,7 +116,7 @@ public class LoginTest {
 	public void i_open_the_page(String st)  {
 
 
-
+		System.out.println("TEST STARTED: "+scenario.getName());
 		page pg=page.valueOf(st);
 		String path="";
 		
@@ -1203,7 +1201,7 @@ Date date = new Date();
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("TEST COMPLETED: "+scenario.getName());
+		System.out.println("TEST COMPLETED: "+scenario.getName()+" STATUS: "+scenario.getStatus());
 		driver.close();
 	}
 	
