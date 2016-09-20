@@ -54,6 +54,7 @@ public class LoginTest {
 	
 	protected List<String> lead=new ArrayList<String>();
 	protected String forename;
+	public String error;
 	protected String surname;
 	protected int count=0;
 	protected String comsite="";
@@ -1576,7 +1577,7 @@ Date date = new Date();
 		List<WebElement> ele = new ArrayList<>();
 		ele=driver.findElements(By.name(st));
 		Helper help = new Helper();
-		
+		String ss = "ERROR IN THE METHOD: 'WHEN I CLICK ON BUTTON NAME "+st+"'";
 		WebElement el = null;
 		
 		if(ele.size()>1)
@@ -1616,14 +1617,50 @@ Date date = new Date();
 			executor.executeScript("arguments[0].click();", el);			
 		}else
 		{
-			System.out.println("ready?");
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			try {
-				String dob=reader.readLine();
-				System.out.println(dob);
-			} catch (IOException e) {
+				Thread.sleep(5000);
+				ele=driver.findElements(By.name(st));
+				if(ele.size()>1)
+				{
+				for(int i = 0; i<ele.size();i++)
+				{
+					String vl = ele.get(i).getAttribute("value");
+					if(help.contains(vles, vl))
+					{
+						el = ele.get(i);
+						break;
+						
+					}else
+					{
+						if(!st.equals("commit"))
+						{
+							el = ele.get(i);
+							break;
+						}
+					}
+						
+					
+				}			
+				}else
+				{
+					if(ele.size() == 1)
+					{
+						el = driver.findElement(By.name(st));
+					}
+					
+				}
+				
+				
+				
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				error = e.getMessage();
+			}
+			
+			if(el == null)
+			{
+				System.out.print(ss+" "+error);
 			}
 		}
 		
