@@ -2175,19 +2175,74 @@ Date date = new Date();
 		
 	}
 	
-	
+	@When("^I check box id \"([^\"]*)\"$")
+	public void i_check_box_id(String st) throws Throwable
+	{
+		
+		String ss = "ERROR AT METHOD: WHEN I CHECK BOX ID '"+st+"'";
+		
+		try {
+			Thread.sleep(5000);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		WebElement wel = getElement(st);
+		
+		if(wel!=null)
+		{
+			clickElement(wel);
+			
+			
+		}else
+		{
+			try {
+				Thread.sleep(5000);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			wel = getElement(st);
+			if(wel!=null)
+			{
+				clickElement(wel);
+				
+				
+			}else
+			{
+				System.out.println(ss);
+			}
+			
+			
+		}
+		
+		
+		
+		
+	}
 	
 	@When ("^I click on fieldset element \"([^\"]*)\"$")
 	public void When_I_click_on_fieldset_element(String st)
 	{
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		List<WebElement> ele=new ArrayList<WebElement>();
 		
 		ele=driver.findElements(By.tagName("fieldset"));
 		JavascriptExecutor jse = (JavascriptExecutor)driver;
 		jse.executeScript("window.scrollBy(0,250)", "");
+		WebElement wel;
+		
 		for(int i=0;i<ele.size();i++)
 		{
-			WebElement wel=ele.get(i);
+			wel=ele.get(i);
 			wel.click();
 			List<WebElement> felem=new ArrayList<>();
 			List<WebElement> lalem=new ArrayList<>();

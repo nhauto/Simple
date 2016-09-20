@@ -1,7 +1,7 @@
 Feature: 3 months
 
 
-Scenario: Anytime  12 months current - One Time Payment - success
+Scenario: Anytime  12 months current - One Time Payment
 
 Given I open the page "waf"
 Then I am on page "aber"
@@ -36,39 +36,5 @@ When I press button named "commit"
 #Then I wait
 Then I am on page "aber"
 When I scroll down
-When I click on fieldset element "summary_form_marketing_email"
-When I scroll down "900"
-When I click on class "form__row form__row--limestone form__custom-check"
-#Then I wait
-When I click on button name "commit"
-Then I wait
-When I click on button name "VISA_brand"
-When I fill "cardname" with "xyz"
-When I fill "cardnumber" with "4111111111111111"
-When I select item "2" in menu "Ecom_Payment_Card_ExpDate_Month"
-When I select item "2" in menu "Ecom_Payment_Card_ExpDate_Year"
-When I fill "cardyear" with "2017"
-When I fill "cardcvs" with "737"
-#Then I wait
-When I click on button name "payment"
-Then I wait for order id
-#Then I wait
-Given I navigate to salesforce
-When I enter Login and Password
-#Then I wait
-Then I should login to Salesforce
-When I switch to tab "Opportunities"
-Then I am on page "Opportunities"
-When I click on button name "go"
-Then I am on page "Opportunities"
-#When I click on opportunity
-Then I open opportunity
-Then I am on page "Opportunity"
-#Then I wait
-Then I can see "Site" filled with "Aberdeen"
-Then I can see "Amount" filled with "total"
-#Then I can see checked "00N8E000000Y1ux_chkbox"
-#When I click on contact link
-Then I can see "Order Reference" filled with "orid"
-Then I can see "Payment Reference" filled with "pay"
-Then I do save
+When I check box id "summary_form_marketing_email"
+When I check box id "summary_form_terms_and_conditions"
