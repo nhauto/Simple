@@ -39,6 +39,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -111,6 +112,21 @@ public class LoginTest {
 		wait=new WebDriverWait(driver,45);			
 		 driver.get(Cred.salesforce);
 		 driver.manage().window().maximize();
+	}
+	
+	@Given("^I start ie \"([^\"]*)\"$")
+	public void i_start_ie(String st) throws Throwable
+	{
+		
+		System.out.println("TEST STARTED IN IE: "+scenario.getName());
+		String path = Cred.waf+st;
+		System.setProperty("webdriver.ie.driver", "C:\\SeleniumDrivers\\IEDriverServer.exe");
+		driver = new InternetExplorerDriver();	
+		
+		 wait=new WebDriverWait(driver,45);			
+		 driver.get(path);
+		 driver.manage().window().maximize();
+		
 	}
 	
 	
@@ -251,8 +267,15 @@ public class LoginTest {
 	public void I_enter_Login_and_Passwor()
 	{
 		wait.until(ExpectedConditions.elementToBeClickable(By.id("username")));
-		driver.findElement(By.id("username")).sendKeys(Cred.max.Login);
-		driver.findElement(By.id("password")).sendKeys(Cred.max.Password);
+		
+		WebElement lo = driver.findElement(By.id("username"));
+		WebElement pa = driver.findElement(By.id("password"));
+		
+		populateElement(lo,Cred.max.Login);
+		populateElement(pa,Cred.max.Password);
+		
+	//	driver.findElement(By.id("username")).sendKeys(Cred.max.Login);
+	//	driver.findElement(By.id("password")).sendKeys(Cred.max.Password);
 		driver.findElement(By.id("Login")).click();
 	}
 	@SuppressWarnings("deprecation")
@@ -1588,7 +1611,13 @@ Date date = new Date();
 
 			 WebElement element=driver.findElement(By.id(ID));
 			 element.clear();
-			 element.sendKeys(str);
+			 
+			 
+			 //this is what we had
+		//	 element.sendKeys(str);
+			 
+			 populateElement(element,str);
+			 
 			 //values for salesforce
 			 //name_firstlea2
 			 //name_lastlea2
@@ -1900,7 +1929,10 @@ Date date = new Date();
 			if(value!=null)
 			{
 			element.clear();
-			element.sendKeys(value);
+		//	element.sendKeys(value);
+			
+			populateElement(element,value);
+			
 			}else
 			{
 				element.sendKeys("ERROR");
@@ -1933,7 +1965,12 @@ Date date = new Date();
 			if(value!=null)
 			{
 			element.clear();
-			element.sendKeys(value);
+			
+			//here is what we use to have
+			//element.sendKeys(value);
+			
+			populateElement(element,value);
+			
 			}else
 			{
 				element.sendKeys("ERROR");
@@ -2175,6 +2212,33 @@ Date date = new Date();
 		el.sendKeys(Keys.ARROW_UP);
 		
 	}
+
+	@When("^I set date \"([^\"]*)\"$")
+	public void When_I_set_date(String date)
+	{
+		String[] dat=date.split("/");
+		int day=1;
+		int month=1;
+		int year=70;
+		
+		if(dat.length==3)
+		{
+			day=Integer.parseInt(dat[0]);
+			month=Integer.parseInt(dat[1]);
+			year=Integer.parseInt(dat[2])-1900+1;
+		}
+		
+		WebElement dy=driver.findElement(By.id("personal_details_form_date_of_birth_day"));
+		WebElement mn=driver.findElement(By.id("personal_details_form_date_of_birth_month"));
+		WebElement yr=driver.findElement(By.id("personal_details_form_date_of_birth_year"));
+		
+		JavascriptExecutor executor = (JavascriptExecutor)driver;
+		executor.executeScript("arguments[0].value='"+dat[0]+"';", dy);	
+		executor.executeScript("arguments[0].value='"+dat[1]+"';", mn);	
+		executor.executeScript("arguments[0].value='"+dat[2]+"';", yr);	
+		
+	}
+	
 	
 	@When("^I set to date \"([^\"]*)\"$")
 	public void When_I_set_to_date(String date)
@@ -2480,7 +2544,8 @@ Date date = new Date();
 		try {
 
 			element.clear();
-			element.sendKeys(txt);
+			//element.sendKeys(txt);
+			populateElement(element,txt);
 		} catch (Exception e) {
  
 
@@ -2556,7 +2621,10 @@ Date date = new Date();
 			try {
 
 				element.clear();
-				element.sendKeys(date);
+				//element.sendKeys(date);
+				
+				populateElement(element,date);
+				
 			} catch (Exception e) {
 	 
 
@@ -2602,7 +2670,9 @@ Date date = new Date();
 			try {
 
 				element.clear();
-				element.sendKeys(mid);
+				//element.sendKeys(mid);
+				
+				populateElement(element,mid);
 			} catch (Exception e) {
 	 
 
@@ -2636,7 +2706,8 @@ Date date = new Date();
 				element.clear();
 				if(txt.length()>0)
 				{
-				element.sendKeys(txt);
+				//element.sendKeys(txt);
+				populateElement(element,txt);
 				}
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
@@ -2781,6 +2852,10 @@ Date date = new Date();
 		executor.executeScript("arguments[0].click();", el);	
 	}
 	
-	
+	void populateElement(WebElement el,String st)
+	{
+		JavascriptExecutor executor = (JavascriptExecutor)driver;
+		executor.executeScript("arguments[0].value='"+st+"';", el);	
+	}
 	
 }
