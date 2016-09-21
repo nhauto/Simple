@@ -3,7 +3,7 @@ Feature: 3 months
 
 Scenario: Anytime  12 months current - One Time Payment
 
-Given I open the page "waf"
+Given I start chrome "aberdeen"
 Then I am on page "aber"
 When I click on fieldset element "choose_membership_package_form_payment_type_once"
 When I click on fieldset element "choose_membership_package_form_commitment_12"

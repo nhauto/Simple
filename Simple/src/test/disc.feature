@@ -2,7 +2,7 @@ Feature: online joining with discount applied
 
 Scenario: Anytime  12 months current - Direct Debit - success
 
-Given I open the page "waf"
+Given I start "stoke-poges"
 Then I am on page "aber"
 When I click on link class "discount__link  "
 When I fill field "_code" with text "AXA010916"

@@ -35,6 +35,7 @@ import main.java.Cred;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -113,6 +114,43 @@ public class LoginTest {
 	}
 	
 	
+	@Given("^I start chrome \"([^\"]*)\"$")
+	public void i_start_chrome(String st) throws Throwable
+	{
+		
+		System.out.println("TEST STARTED IN CHROM: "+scenario.getName());
+		String path = Cred.waf+st;
+		System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDrivers\\chromedriver.exe");
+		driver = new ChromeDriver();	
+		
+		wait=new WebDriverWait(driver,45);			
+		 driver.get(path);
+		 driver.manage().window().maximize();
+		
+	}	
+	
+	@Given("^I start \"([^\"]*)\"$")
+	public void i_start(String st) throws Throwable
+	{
+		
+		System.out.println("TEST STARTED: "+scenario.getName());
+		String path = Cred.waf+st;
+		
+		File pathBinary=new File("C:\\NB\\firefox-sdk\\bin\\firefox.exe");
+		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
+		FirefoxProfile fprofile=new FirefoxProfile();
+	//	fprofile.setPreference("dom.forms.number", false);
+		driver=new FirefoxDriver(Binary,fprofile);
+		
+		wait=new WebDriverWait(driver,45);			
+		 driver.get(path);
+		 driver.manage().window().maximize();
+		
+		
+		
+	}
+	
+	
 	@Given("^I open the page \"([^\"]*)\"$")
 	public void i_open_the_page(String st)  {
 
@@ -155,6 +193,7 @@ public class LoginTest {
 		 driver.get(path);
 		 driver.manage().window().maximize();
 	}	
+	
 	
 	
 	@Given ("^I navigate to salesforce$")
