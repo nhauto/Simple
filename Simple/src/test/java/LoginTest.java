@@ -53,7 +53,7 @@ public class LoginTest {
 
 	protected WebDriver driver;
 	protected WebDriverWait wait;
-	
+	protected boolean leap = true;
 	protected List<String> lead=new ArrayList<String>();
 	protected String forename;
 	public String error;
@@ -64,12 +64,23 @@ public class LoginTest {
 	protected String total="";
 	protected String monthly="";
 	protected String fee="";
+ 
 	protected String membership="";
 	protected String memcost="";
 	protected String prorata="";
 	protected String payref="";
+	protected String hidprorata;
+	protected String discount;
+	protected String hidfee;
+	protected String disc;
+	protected String next;
+	protected String hidnext;
+	
+	
 	protected String[] vles = {"Next","Set up Direct Debit", "Proceed to payment","VISA_brand"};
-	protected String[] amounts={total,membership,fee,prorata,monthly};
+	protected String[] amounts={total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
+	
+	List<String> vals = new ArrayList<>();
 	public Scenario scenario;
 	
 	public enum page
@@ -423,6 +434,80 @@ public class LoginTest {
 		
 	}
 	
+	@When("^I get basket monthly$")
+	public void i_get_basket_monthly() throws Throwable 
+	{
+		String disce = "basket-drawer__value basket-drawer__value--discount-amount";
+		String mem = "basket-drawer__value js-basket-membership";
+		String feee = "basket-drawer__value js-basket-activation";
+		String removedfee = "basket-drawer__value basket-drawer__value--promotion js-basket-activation-promotion";
+		String proratae = "basket-drawer__value js-basket-prorata";
+		String removedprorata = "basket-drawer__value basket-drawer__value--promotion js-basket-prorata-promo";
+		String nexte = "basket-drawer__value js-basket-next-month";
+		String removednext = "basket-drawer__value basket-drawer__value--promotion js-basket-monthly";
+		String totale = "basket-drawer__value js-basket-today";
+		String monthlye = "js-basket-monthly";
+		 
+		String[] vals = {totale,mem,feee,proratae,monthlye,removedprorata,removedfee,disce,nexte,removednext};
+		
+		for(int i = 0; i<vals.length; i++)
+		{
+			if(i!=4)
+			{
+			amounts[i] = getClassText(vals[i]);
+			
+				
+			}else
+			{
+				amounts[i] = getClassText(vals[9]);
+				if(amounts[i].equals(""))
+				{
+					amounts[i] = getClassSpanText(vals[i]);
+				}
+			}
+		}
+		
+	//	protected String[] amounts={total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
+	//                                 0       1       2    3       4         5        6     7    8    9	
+			
+		
+		
+	}
+	@When("^I get basket$")
+	public void i_get_basket() throws Throwable 
+	{
+		String disce = "basket-drawer__value basket-drawer__value--discount-amount";
+		String mem = "basket-drawer__value js-basket-membership";
+		String feee = "basket-drawer__value js-basket-activation";
+		String removedfee = "basket-drawer__value basket-drawer__value--promotion js-basket-activation-promotion";
+		String proratae = "basket-drawer__value js-basket-prorata";
+		String removedprorata = "basket-drawer__value basket-drawer__value--promotion js-basket-prorata-promo";
+		String nexte = "basket-drawer__value js-basket-next-month";
+		String removednext = "basket-drawer__value basket-drawer__value--promotion js-basket-monthly";
+		String totale = "basket-drawer__value js-basket-today";
+		String monthlye = "js-basket-monthly";
+		 
+		String[] vals = {totale,mem,feee,proratae,monthlye,removedprorata,removedfee,disce,nexte,removednext};
+		
+		for(int i = 0; i<vals.length; i++)
+		{
+			if(i!=4)
+			{
+			amounts[i] = getClassText(vals[i]);
+				
+			}else
+			{
+				amounts[i] = getClassSpanText(vals[i]);
+			}
+		}
+		
+	//	protected String[] amounts={total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
+	//    0      1          2    3      4          5	
+		
+		
+		
+	}
+	
 	@Then("^I grab amount \"([^\"]*)\"$")
 	public void Then_I_grab_amount(String fn)
 	{
@@ -434,12 +519,17 @@ public class LoginTest {
 			// 0       1        2    3       4
 			//total,membership,fee,prorata,monthly
 			
-			WebElement wel = driver.findElement(By.className(cls));
+			WebElement wel = getClassElement(cls);
+					//driver.findElement(By.className(cls));
 			
 			List<WebElement> ele = new ArrayList<>();
 			
 			ele = wel.findElements(By.tagName("div"));
 			String cont = "";
+			cont = wel.getText();
+			
+			if(!isThing(cont))
+			{
 			for(int i = 0; i<ele.size(); i++)
 			{
 				WebElement we = ele.get(i);
@@ -453,7 +543,11 @@ public class LoginTest {
 				{
 					 cont = txt;
 				}
+			}				
 			}
+			
+			
+
 			
 			 
 			
@@ -469,12 +563,23 @@ public class LoginTest {
 			{
 				amounts[3] = cont;
 				break;
-			}			
+			}	
+			case "proratahid":
+			{
+				 
+				amounts[5] = cont;
+				break;
+			}	
 			case "fee":
 			{
 				amounts[2] = cont;
 				break;
-			}		
+			}	
+			case "feehid":
+			{
+				amounts[2] = cont;
+				break;
+			}	
 			case "member":
 			{
 				memcost = cont;
@@ -815,6 +920,160 @@ public class LoginTest {
 		
 	}
 	
+	@Then("^I check total monthly$")
+	public void i_check_total_monthly() throws Throwable 
+	{
+		//{total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
+		 //   0    1         2   3        4        5        6      7     8    9
+		String[] labels = {"total","membership","activation fee","prorata","removed prorata","removed fee","discount","next month fee","removed next month"};
+		Helper help = new Helper();
+		double[] db = new double[amounts.length];
+		
+		for(int i = 0; i<db.length; i++)
+		{
+			try {
+				db[i] = Double.parseDouble(amounts[i].replace("£", ""));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		}
+		Double tot = 0.0;
+		double nex = 0.00;
+		double pro =0.00;
+		
+		int romf = scenario.getName().indexOf("ROMF");
+		
+		int nmf = scenario.getName().indexOf("NMF");
+		
+		if(romf>-1)
+		{
+			pro = db[5];
+		}else
+			{
+			pro = db[3];
+			}
+					
+		
+		if(nmf>-1)
+		{
+			nex = db[8];
+		}else
+		{nex = db[9];}
+		
+		if(help.isCutOff())
+		{
+			tot = db[2]+db[3]+nex;
+		}else
+		{
+			tot = db[2]+db[3];
+		}
+		
+		double calt = (double) Math.round(tot * 100) / 100;
+		double totl = (double) Math.round(db[0] * 100) / 100;
+		double comp = Double.compare(calt,totl);
+		
+		boolean com = compare(tot,db[0]);
+		 if(!com)
+		 {
+			 interact("error: total of "+amounts[0]+" in basket doesn't match expected "+Double.toString(tot));
+		 }
+		 	Date date = new Date();
+		    Calendar cal = Calendar.getInstance();
+		    cal.setTime(date);
+		    int year = cal.get(Calendar.YEAR);
+		    int month = cal.get(Calendar.MONTH);
+		    int day = cal.get(Calendar.DAY_OF_MONTH);
+			
+		    int dim = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+		    int diy = cal.getActualMaximum(Calendar.DAY_OF_YEAR);
+		     
+//		    double dy = mon/dim;
+//		    
+		   int rem = dim-day+1;
+		   
+		   double pr =0;
+		 
+
+		   double dy = db[9]/dim;
+		   double pror = dy*rem;
+		   
+		   if((double) Math.round(pror * 100) / 100!=(double) Math.round(pro * 100) / 100)
+		   {
+			   interact("error: prorata in basket of "+pro+" does not match expected "+Double.toString(pror));
+		   }
+		 		
+	
+	
+	}
+	
+	@Then("^I check total \"([^\"]*)\"$")
+	public void i_check_total(String st) throws Throwable 
+	{
+		//{total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
+		 //   0    1         2   3        4        5        6      7     8    9
+		String[] labels = {"total","membership","activation fee","prorata","removed prorata","removed fee","discount","next month fee","removed next month"};
+		Helper help = new Helper();
+		double[] db = new double[amounts.length];
+		
+		for(int i = 0; i<db.length; i++)
+		{
+			try {
+				db[i] = Double.parseDouble(amounts[i].replace("£", ""));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		}
+		Double tot = 0.0;
+		if(help.isCutOff())
+		{
+			tot = db[1]+db[2]+db[3];
+		}else
+		{
+			tot = db[1]+db[2]+db[3];
+		}
+		
+		double calt = (double) Math.round(tot * 100) / 100;
+		double totl = (double) Math.round(db[0] * 100) / 100;
+		double comp = Double.compare(calt,totl);
+		
+		boolean com = compare(tot,db[0]);
+		 if(!com)
+		 {
+			 interact("error: total of "+amounts[0]+" in basket doesn't match expected "+Double.toString(tot));
+		 }
+		 	Date date = new Date();
+		    Calendar cal = Calendar.getInstance();
+		    cal.setTime(date);
+		    int year = cal.get(Calendar.YEAR);
+		    int month = cal.get(Calendar.MONTH);
+		    int day = cal.get(Calendar.DAY_OF_MONTH);
+			
+		    int dim = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+		    int diy = cal.getActualMaximum(Calendar.DAY_OF_YEAR);
+		     
+//		    double dy = mon/dim;
+//		    
+		   int rem = dim-day+1;
+		   
+		   double pr =0;
+		 
+
+		   double dy = db[1]/diy;
+		   double pror = dy*rem;
+		   
+		   if((double) Math.round(pror * 100) / 100!=(double) Math.round(db[5] * 100) / 100)
+		   {
+			   interact("error: removed prorata in basket of "+amounts[5]+" does not match expected "+Double.toString(pror));
+		   }
+		 
+		 
+		 
+	}
+	
 	
 	@Then("^I check figures \"([^\"]*)\"$")
 	public void i_check_figures(String st) 
@@ -1025,6 +1284,27 @@ Date date = new Date();
 		
 		switch(st)
 		{
+		case "amount":
+		{
+			filled=0;
+			//{total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
+			//   0      1         2   3        4       5          6    7     8      9
+			
+			double mnt = Double.parseDouble(amounts[4].replace("£", ""));
+			double f = Double.parseDouble(amounts[2].replace("£", ""));
+			double pro = Double.parseDouble(amounts[3].replace("£", ""));
+			double yr = (mnt*12)+f+pro;
+			
+			double sm = (double) Math.round(yr * 100) / 100;
+			vl = "£"+Double.toString(sm);
+			String[] aft = vl.split("\\.");
+			if(aft[1].length()<2)
+			{
+				vl = vl+"0";
+			}
+			
+			break;
+		}
 		case "total":
 		{
 			filled=0;
@@ -1085,6 +1365,21 @@ Date date = new Date();
 		case "Bolton":
 		{
 			vl = "Bolton";
+			break;
+		}
+		case "Shoreditch":
+		{
+			vl = "Shoreditch";
+			break;
+		}
+		case "Guiseley":
+		{
+			vl = "Guiseley";
+			break;
+		}
+		case "Ealing":
+		{
+			vl = "Ealing";
 			break;
 		}
 		}
@@ -2031,12 +2326,53 @@ Date date = new Date();
 		
 	}
 
-
+	@When("^I verify that \"([^\"]*)\" is \"([^\"]*)\"$")
+	public void i_verify_that_is(String fn, String st) throws Throwable
+	{
+		String am = "";
+		switch(fn)
+		{
+		case "fee":
+		{
+			am = amounts[2];
+			
+			
+			break;
+		}
+		case "monthly":
+		{
+			am = amounts[9];
+			
+			
+			break;
+		}
+		
+		case "membership":
+		{
+			am = amounts[1];
+			break;
+		}
+		
+		}
+		
+		
+		if(!am.equals("£"+st))
+		{
+			String er = fn+ " amount of "+am+" in the basket is not equal to expected £"+st;
+			
+			interact(er);
+			
+			
+		}
+		
+		
+	}
 	
 	@When ("^I do click on \"([^\"]*)\"$")
 	public void When_I_do_click_on(String st)
 	{
-		driver.findElement(By.id(st)).click();
+		WebElement el = getElement(st);
+		clickElement(el);
 		
 	}
 	
@@ -2050,7 +2386,16 @@ Date date = new Date();
 	}
 	
 	
+	@When ("^I click on link text \"([^\"]*)\"$")
+	public void When_I_click_on_link_text(String st)
+	{
 	
+		WebElement wel = getLinkText(st);
+		
+		clickElement(wel);
+				
+		
+	}
 	
 	@When ("^I click on link \"([^\"]*)\"$")
 	public void When_I_click_on_link(String st)
@@ -2845,6 +3190,51 @@ Date date = new Date();
 		return result;
 	}
 	
+	void interact(String st)
+	{
+		System.out.println(st);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			String dob=reader.readLine();
+			System.out.println(dob);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	String getClassText(String cls)
+	{
+		String result = null;
+		List<WebElement> ele = new ArrayList<>();
+		ele = driver.findElements(By.xpath("//div[@class='"+cls+"']"));
+		WebElement wel = null;
+		if(ele.size()>0)
+		{wel = ele.get(0);}
+		result = wel.getAttribute("innerText");
+		
+		return result;
+	}
+	String getClassSpanText(String cls)
+	{
+		String result = null;
+		
+		WebElement wel = driver.findElement(By.xpath("//span[@class='"+cls+"']"));
+		result = wel.getText();
+		
+		return result;
+	}
+	WebElement getClassElement(String cls)
+	{
+		WebElement result = null;
+		
+		result = driver.findElement(By.xpath("//div[@class='"+cls+"']"));
+		 
+		
+		return result;
+	}
 	
 	void clickElement(WebElement el)
 	{
@@ -2856,6 +3246,50 @@ Date date = new Date();
 	{
 		JavascriptExecutor executor = (JavascriptExecutor)driver;
 		executor.executeScript("arguments[0].value='"+st+"';", el);	
+	}
+	
+	boolean isThing(String st)
+	{
+		boolean result = false;
+		
+		if(st!=null)
+		{
+			if(st.length()>0)
+			{
+				result = true;
+			}
+		}
+		
+		
+		return result;
+		
+	}
+	
+	boolean compare(Double s1,Double s2)
+	{
+		boolean result = true;
+		
+		Double S1 = (double) Math.round(s1 * 100) / 100;
+		Double S2 = (double) Math.round(s2 * 100) / 100;
+		
+		int co =(Integer)Double.compare(S1, S2);
+		
+		if(co!=0)
+		{
+			result = false;
+		}
+		
+		return result;
+	}
+	
+	
+	
+	
+	WebElement getLinkText(String st)
+	{
+		WebElement result = driver.findElement(By.xpath("a[text()='"+st+"']"));
+		return result;
+		
 	}
 	
 }
