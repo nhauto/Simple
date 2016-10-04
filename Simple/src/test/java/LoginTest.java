@@ -64,7 +64,7 @@ public class LoginTest {
 	protected String total="";
 	protected String monthly="";
 	protected String fee="";
- 
+	public boolean cutoffset;
 	protected String membership="";
 	protected String memcost="";
 	protected String prorata="";
@@ -75,7 +75,7 @@ public class LoginTest {
 	protected String disc;
 	protected String next;
 	protected String hidnext;
-	
+	public boolean cutoff;
 	
 	protected String[] vles = {"Next","Set up Direct Debit", "Proceed to payment","VISA_brand"};
 	protected String[] amounts={total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
@@ -962,13 +962,31 @@ public class LoginTest {
 		}else
 		{nex = db[9];}
 		
-		if(help.isCutOff())
+		if(cutoffset)
 		{
-			tot = db[2]+db[3]+nex;
+			if(cutoff)
+			{
+				tot = db[2]+db[3]+nex;
+			}else
+			{
+				tot = db[2]+db[3];
+				
+			}
+			
+			
 		}else
 		{
-			tot = db[2]+db[3];
+			if(help.isCutOff())
+			{
+				tot = db[2]+db[3]+nex;
+			}else
+			{
+				tot = db[2]+db[3];
+			}
+			
 		}
+		
+
 		
 		double calt = (double) Math.round(tot * 100) / 100;
 		double totl = (double) Math.round(db[0] * 100) / 100;
@@ -1187,7 +1205,18 @@ Date date = new Date();
 				}
 		double pro = 0;
 		try {
-			pro = Double.parseDouble(amounts[3].replace("£", ""));
+			
+			if(scenario.getName().contains("ROMF"))
+			{
+				pro = Double.parseDouble(amounts[5].replace("£", ""));		
+				
+			}
+			else
+			{
+				
+			pro = Double.parseDouble(amounts[3].replace("£", ""));	
+			}
+			
 		} catch (NumberFormatException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -1291,6 +1320,10 @@ Date date = new Date();
 			//   0      1         2   3        4       5          6    7     8      9
 			
 			double mnt = Double.parseDouble(amounts[4].replace("£", ""));
+			if(mnt == 0.00)
+			{
+				mnt = Double.parseDouble(amounts[1].replace("£", ""));
+			}
 			double f = Double.parseDouble(amounts[2].replace("£", ""));
 			double pro = Double.parseDouble(amounts[3].replace("£", ""));
 			double yr = (mnt*12)+f+pro;
@@ -1382,6 +1415,16 @@ Date date = new Date();
 			vl = "Ealing";
 			break;
 		}
+		case "Preston":
+		{
+			vl = "Preston";
+			break;
+		}
+		case "Derby":
+		{
+			vl = "Derby";
+			break;
+		}
 		}
 		
 		Helper help = new Helper();
@@ -1415,6 +1458,27 @@ Date date = new Date();
 		}
 		
 		
+	}
+	
+	@Then("^I set cutoff \"([^\"]*)\"$")
+	public void i_set_cutoff(String st)
+	{
+		cutoffset = true;
+		switch(st)
+		{
+			case "true":
+				{
+					cutoff = true;
+					break;
+				}
+			case "false":
+				{
+					cutoff = false;
+					break;
+				}		
+		
+		
+		}
 	}
 	
 	@Then("^I can see field \"([^\"]*)\" filled with \"([^\"]*)\"$")
@@ -3133,7 +3197,7 @@ Date date = new Date();
 		boolean result = true;
 		
 		List<WebElement> ele = new ArrayList<>();
-		ele = driver.findElements(By.className(st));
+		ele = driver.findElements(By.xpath("div[@class='"+st+"']"));
 		
 		if(ele.size()<1)
 		{
@@ -3213,7 +3277,11 @@ Date date = new Date();
 		WebElement wel = null;
 		if(ele.size()>0)
 		{wel = ele.get(0);}
-		result = wel.getAttribute("innerText");
+		if(wel!=null)
+		{
+			result = wel.getAttribute("innerText");
+		}
+		
 		
 		return result;
 	}

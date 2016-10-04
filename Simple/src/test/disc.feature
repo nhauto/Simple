@@ -1,19 +1,22 @@
 Feature: online joining with discount applied
 
-Scenario: OLJPLAIN01 Anytime  12 months current - One Time Payment
+Scenario: OJ15E2EREG65 Anytime  12 months - PP DISCOUT 20% NMF
 
-Given I start "aberdeen"
+Given I start "derby"
 Then I am on page "aber"
-When I click on fieldset element "choose_membership_package_form_payment_type_once"
+When I click on link class "discount__link  "
+When I fill field "_code" with text "VOD010916"
+When I click button text "Apply code"
+Then I wait
+When I click span "Once"
+When I scroll up
 When I click on fieldset element "choose_membership_package_form_commitment_12"
 When I click on basket
 Then I wait
-#When I get basket
-Then I get amount value "total"
-Then I get amount "member"
-Then I grab amount "fee"
-Then I grab amount "prorata"
-Then I get amount "monthly"
+When I get basket
+When I verify that "membership" is "528.00"
+When I verify that "fee" is "20.00"
+#Then I check total "12"
 Then I can see all figures good "12"
 When I press button named "commit"
 Then I am on page "aber"
@@ -21,7 +24,7 @@ When I select "Mr" in menu "personal_details_form_title"
 When I fill dynamic field "personal_details_form_first_name" with "firstname"
 When I fill dynamic field "personal_details_form_last_name" with "lastname"
 When I click on element with id "personal_details_form_date_of_birth_day"
-When I set to date "1/1/1970"
+When I set date "1/1/1970"
 When I select "Male" in menu "personal_details_form_gender"
 When I fill "housenumber" with "473"
 When I fill "postcode" with "IV448TZ"
@@ -39,6 +42,7 @@ When I scroll down
 When I check box id "summary_form_marketing_email"
 When I scroll down "900"
 When I check box id "summary_form_terms_and_conditions"
+When I check box id "summary_form_corporate_terms"
 #Then I wait
 When I click on button name "commit"
 Then I wait
@@ -61,14 +65,11 @@ When I switch to tab "Opportunities"
 Then I am on page "Opportunities"
 When I click on button name "go"
 Then I am on page "Opportunities"
-#When I click on opportunity
 Then I open opportunity
 Then I am on page "Opportunity"
-#Then I wait
-Then I can see "Site" filled with "Aberdeen"
+Then I can see "Site" filled with "Derby"
 Then I can see "Amount" filled with "total"
-#Then I can see checked "00N8E000000Y1ux_chkbox"
-#When I click on contact link
 Then I can see "Order Reference" filled with "orid"
 Then I can see "Payment Reference" filled with "pay"
 Then I do save
+
