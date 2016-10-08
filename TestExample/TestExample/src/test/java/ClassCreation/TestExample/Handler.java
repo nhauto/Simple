@@ -28,15 +28,24 @@ public class Handler {
 	public Scenario scenario;
 	protected WebDriver driver;
 	protected WebDriverWait wait;
+	public PageModel page;
+	
 	
 	@Before
 	public void before(Scenario scenario) 
 	{
 	   
 		this.scenario = scenario;
-	    
-	   
+		File pathBinary=new File("C:\\NB\\firefox-sdk\\bin\\firefox.exe");
+		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
+		FirefoxProfile fprofile=new FirefoxProfile();
+ 
+		driver=new FirefoxDriver(Binary,fprofile);
+		
+		wait=new WebDriverWait(driver,45);		
+		
 	}
+	
 	
 	@Given("^I am on the QAWorks Site$")
 	public void i_am_on_the_QAWorks_Site() throws Throwable 
@@ -44,16 +53,14 @@ public class Handler {
 		System.out.println("TEST STARTED: "+scenario.getName());
 		String path = "http://QAWorks.com";
 		
-		File pathBinary=new File("C:\\NB\\firefox-sdk\\bin\\firefox.exe");
-		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
-		FirefoxProfile fprofile=new FirefoxProfile();
- 
-		driver=new FirefoxDriver(Binary,fprofile);
-		
-		wait=new WebDriverWait(driver,45);			
+	
 		 driver.get(path);
 		 driver.manage().window().maximize();
-	
+		 
+		 // creating and initialising page object here
+		 
+		 page = new PageModel(driver);
+		 page.init();
 	
 	}
 
@@ -61,54 +68,32 @@ public class Handler {
 	public void i_should_be_able_to_contact_QAWorks_with_the_following_information(DataTable tb) throws Throwable {
 	    
 		List<List<String>> table = tb.raw();
-		
-		ClickLinkText("Contact");
+		page.pageContact.click();
+
 		Thread.sleep(2000);
 
 		for(int i = 0; i<table.size(); i++)
 		{
 			List<String> row = table.get(i);
-			String ID = "";
+			
 			if(!row.isEmpty())
 			{
-				try {
-					ID = getPropValue(row.get(0));
-					
-					
-					
-					
-				} catch (Exception e) {
-					System.out.println("Cannot fetch field id for field: "+row.get(0)+" in scenario: "+scenario.getName());
-				}
-				
-				String rw = row.get(0);
-				WebElement field = getElement(ID);
-				
+			
+			String rw = row.get(0);
+
 				String val = getValue(table,rw);
+
 				
-				field.sendKeys(val);
+				WebElement wel = selectElement(rw);
+				wel.sendKeys(val);
 				
 			}
 			
 			
 		}
 		
-		String sendid = "";
-
-		try {
-			sendid = getPropValue("send");
-		} catch (Exception e) {
-			System.out.println("unable to find button 'send' in scenario: "+scenario.getName());
-			e.printStackTrace();
-		}
-		if(sendid.length()>0)
-		{
-			WebElement sendbut = getElement(sendid);
-			clickElement(sendbut);
-			System.out.println("Scenario completed: "+scenario.getName()+" status: "+scenario.getStatus());
-		}
-		
-		
+	
+		clickElement(page.pageSend);
 	}
 	
 	// this clicks on link with certain text
@@ -202,7 +187,40 @@ public class Handler {
 		return result;
 	}
 	
+	// returns page model element based on the name
+	
+		WebElement selectElement(String el)
+	{
+		WebElement element = null;
+		
+			switch(el)
+			{
+			case "name":
+			{
+				element = page.pageName;
+				break;
+			}
+			case "email":
+			{
+				element = page.pageMail;
+				break;
+			}
+			case "message":
+			{
+				element = page.pageMessage;
+				break;
+			}
+			
+			
+			}
+		
+		
+		return element;
+	}
+		
 	// this method allows for to click on hidden elements with javascript
+	
+	
 	
 	void clickElement(WebElement el)
 	{
