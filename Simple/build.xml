@@ -75,7 +75,7 @@
         <path refid="Simple.classpath"/>
         <path refid="Maven Dependencies.libraryclasspath"/>
     </path>
-    <path id="run.TempRunner.classpath">
+    <path id="run.Runner.classpath">
         <path refid="Simple.classpath"/>
         <path refid="Maven Dependencies.libraryclasspath"/>
     </path>
@@ -161,16 +161,16 @@
         <mkdir dir="${junit.output.dir}"/>
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="xml"/>
-            <test name="TempRunner" todir="${junit.output.dir}"/>
+            <test name="Runner" todir="${junit.output.dir}"/>
             <classpath refid="run.Simple.classpath"/>
         </junit>
     </target>
-    <target name="TempRunner">
+    <target name="Runner">
         <mkdir dir="${junit.output.dir}"/>
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="xml"/>
-            <test name="TempRunner" todir="${junit.output.dir}"/>
-            <classpath refid="run.TempRunner.classpath"/>
+            <test name="Runner" todir="${junit.output.dir}"/>
+            <classpath refid="run.Runner.classpath"/>
         </junit>
     </target>
     <target name="junitreport">
