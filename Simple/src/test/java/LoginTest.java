@@ -178,6 +178,21 @@ public class LoginTest {
 	}
 	
 	
+	@Given("^I open yandex$")
+	public void i_open_yandex() 
+	{
+		String path = "http://yandex.ru";
+		File pathBinary=new File("C:\\NB\\firefox-sdk\\bin\\firefox.exe");
+		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
+		FirefoxProfile fprofile=new FirefoxProfile();
+	//	fprofile.setPreference("dom.forms.number", false);
+		driver=new FirefoxDriver(Binary,fprofile);
+		
+		wait=new WebDriverWait(driver,45);			
+		 driver.get(path);
+		 driver.manage().window().maximize();
+	}
+	
 	@Given("^I open the page \"([^\"]*)\"$")
 	public void i_open_the_page(String st)  {
 
@@ -388,6 +403,17 @@ public class LoginTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	
+	@When("^I fill \"([^\"]*)\"$")
+	public void i_fill(String st)
+	{
+		
+		FieldSelector ele = new FieldSelector(st,driver);
+		WebElement el = ele.element;
+		el.sendKeys("test");
+		
 	}
 	
 	@When("^I verify amount \"([^\"]*)\" is \"([^\"]*)\"$")
@@ -1577,7 +1603,7 @@ Date date = new Date();
 	@Then("^I do save$")
 	public void Then_I_do_save()
 	{
-		String[] temp=new String[10];
+		String[] temp=new String[11];
 		 
 		String url = driver.getCurrentUrl();
 		
@@ -1592,24 +1618,24 @@ Date date = new Date();
 		//total,membership,fee,prorata,monthly
 		//String[] capt=new String[10];
 		
-		String capt[] = {"forename","surname","total","monthly","fee","prorata","orid","payref","membership","id"};
+		String capt[] = {"scenario","forename","surname","total","monthly","fee","prorata","orid","payref","membership","id"};
 		
 		if(forename==null)
 		{
 			forename = "David";
 			surname = "Archer";
 		}
-		
-		temp[0] = forename;
-		temp[1] = surname;
-		temp[2] = amounts[0];
-		temp[3] = amounts[4];
-		temp[4] = amounts[2];
-		temp[5] = amounts[3];
-		temp[6] = orid;
-		temp[7] = payref;	
-		temp[8] = membership;
-		temp[9] = id;
+		temp[0] = scenario.getName();
+		temp[1] = forename;
+		temp[2] = surname;
+		temp[3] = amounts[0];
+		temp[4] = amounts[4];
+		temp[5] = amounts[2];
+		temp[6] = amounts[3];
+		temp[7] = orid;
+		temp[8] = payref;	
+		temp[9] = membership;
+		temp[10] = id;
 		
 		List<String[]> l = new ArrayList<>();
 		l.add(capt);
