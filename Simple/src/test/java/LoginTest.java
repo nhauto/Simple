@@ -25,10 +25,14 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 
+import cucumber.api.DataTable;
 import cucumber.api.Scenario;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import helper.Compare;
+import helper.Helper;
+import helper.Person;
 import junit.framework.Assert;
 import main.java.Cred;
 
@@ -43,8 +47,19 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
- 
- 
+
+import PageObjectModel.CardPayment;
+import PageObjectModel.Confirmation;
+import PageObjectModel.FieldSelector;
+import PageObjectModel.PayPlan;
+import PageObjectModel.PaymentType;
+import PageObjectModel.PersonalDetails;
+import PageObjectModel.SFLanding;
+import PageObjectModel.SFLogin;
+import PageObjectModel.MemberSummary;
+import PageObjectModel.Opportunities;
+import PageObjectModel.OpportunityRecord;
+import PageObjectModel.POM;
 
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -75,8 +90,23 @@ public class LoginTest {
 	protected String disc;
 	protected String next;
 	protected String hidnext;
+	protected boolean DD;
+	protected Scena scena;
 	public boolean cutoff;
+	public PayPlan payplan;
+	public PersonalDetails personaldetails;
+	public MemberSummary membersummary;
+	public PaymentType paymenttype;
+	public CardPayment cardpayment;
+	public Confirmation confirmation;
+	public SFLogin sflogin;
+	public SFLanding sflanding;
+	public Opportunities opportunities;
+	public OpportunityRecord opportunityrecord;
 	
+	protected Person person;
+	
+	protected POM currentPage;
 	protected String[] vles = {"Next","Set up Direct Debit", "Proceed to payment","VISA_brand"};
 	protected String[] amounts={total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
 	
@@ -88,17 +118,6 @@ public class LoginTest {
 		salesforce,vione,waf
 	}
 	
-//	@Before
-//	public void setup() throws Exception 
-//	{
-//		File pathBinary=new File("C:\\NB\firefox-sdk\bin\firefox.exe");
-//		FirefoxBinary Binary=new FirefoxBinary(pathBinary);
-	//	FirefoxProfile fprofile=new FirefoxProfile();
-		
-	//	driver=new FirefoxDriver(Binary,fprofile);
-		
-//		wait=new WebDriverWait(driver,30);		
-	//}
 
 
 	@Before
@@ -106,7 +125,7 @@ public class LoginTest {
 	{
 	   
 		this.scenario = scenario;
-	    
+	    this.scena = new Scena(scenario.getName());
 	   
 	}
 	
@@ -236,12 +255,367 @@ public class LoginTest {
 		 driver.manage().window().maximize();
 	}	
 	
+	@When("^I proceed to next page$")
+	public void i_proceed_to_next_page() 
+	{
+		WebElement el = currentPage.proceed;
+		clickElement(el);
+	}
 	
+	@When("^I set marketing preferences to \"([^\"]*)\"$")
+	public void i_set_marketing_preferences_to(String st) throws Throwable {
+		
+		 WebElement el = currentPage.get(st);
+		 clickElement(el);
+		
+	}
+	
+	@When("^I proceed to payment$")
+	public void i_proceed_to_payment() 
+    {
+		WebElement el = currentPage.get("MemberSummary_proceed");
+		clickElement(el);
+	}
+
+	
+	
+	@Then("^I should see following values$")
+	public void i_should_see_following_values(DataTable dt) 
+	{
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e2) {
+			// TODO Auto-generated catch block
+			 
+		}
+		Payment pay = new Payment();
+		String scn = scenario.getName();
+		Scena sc = new Scena(scn);
+		
+		if(!DD)
+		{
+		WebElement mb = currentPage.get("PayPlan_membership");
+		pay.setMembership(mb.getAttribute("innerText"));			
+		}
+
+		WebElement fe = currentPage.get("PayPlan_fee");
+		pay.setFee(fe.getAttribute("innerText"));
+		
+		WebElement pr = currentPage.get("PayPlan_prorata");
+		pay.setProrata(pr.getAttribute("innerText"));
+		
+		if(DD)
+		{
+		WebElement mn = currentPage.get("PayPlan_month");
+		pay.setMonthly(mn.getAttribute("innerText"));			
+		}
+
+		 
+		
+		WebElement nx = currentPage.get("PayPlan_nex");
+		
+		String nextm = "";
+		
+		
+		try {
+			nextm = nx.getAttribute("innerText");
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+		//	e1.printStackTrace();
+		}
+		
+		pay.setNextMonth(nextm);
+		
+		WebElement to = currentPage.get("PayPlan_total");
+		pay.setTotal(to.getAttribute("innerText"));
+		
+		if(sc.isROMF)
+		{
+			
+		WebElement proprom = currentPage.get("PayPlan_prorataProm");
+		String ppm = "";
+
+		try {
+			ppm = proprom.getAttribute("innerText");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		pay.setProrataProm(ppm);			
+			
+		}
+		
+		double prorata = 0;
+		Compare comp;
+		if(!DD)
+		{
+			
+			comp = new Compare(pay.getMembershipCost(),Double.parseDouble(Help.get2TableValue(dt, "membership")),Compare.type.membership);
+			comp.compare();
+			
+	
+			prorata = Help.getProrataOnce(pay.getMembershipCost());
+//			
+		}else
+		{
+			
+			comp = new Compare(pay.getMonthlyCost(),Double.parseDouble(Help.get2TableValue(dt, "monthly")),Compare.type.monthly);
+			comp.compare();
+						
+			prorata = Help.getProrataMonthly(pay.getMonthlyCost());
+		}
+		
+		Compare compro;
+		
+		if(sc.isROMF)
+		{
+			
+			compro = new Compare(pay.getProrataCost(),prorata,Compare.type.prorata);
+			comp.compare();
+			
+		}else
+		{
+			compro = new Compare(pay.getProrataPromCost(),prorata,Compare.type.prorata);
+			comp.compare();
+
+		}
+		
+		Compare compfee = new Compare(pay.getFeeCost(),Double.parseDouble(Help.get2TableValue(dt, "activation")),Compare.type.fee);
+		compfee.compare();
+		
+		
+		double expectedTotal = 0;
+		
+		if(DD)
+		{
+			double nxt = 0;
+			
+			if(Help.isCutOff())
+			{
+				nxt = pay.getMonthlyCost();
+			}
+			
+			expectedTotal = prorata + Double.parseDouble(Help.get2TableValue(dt, "activation"))+nxt;
+		}else
+		{
+			expectedTotal = prorata + Double.parseDouble(Help.get2TableValue(dt, "activation")) + pay.getMembershipCost(); 
+		}
+		
+		Compare compex = new Compare(pay.getTotalCost(),expectedTotal,Compare.type.total);
+		compex.compare();
+		
+
+	}
+	
+	@Then("^I should be on MemberSummary page$")
+	public void i_should_be_on_MemberSummary_page() {
+ 
+		membersummary = new MemberSummary(driver);
+		currentPage = membersummary;
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("MemberSummary_MarketingEmail")));
+		
+	}
+	
+	@Then("^I am on SF Landing page$")
+	public void i_am_on_SF_Landing_page() throws Throwable 
+	{
+		try {
+			Thread.sleep(7000);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		sflanding = new SFLanding(driver);
+		currentPage = sflanding;
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("SFLanding_opportunities")));
+		
+	}
+
+	
+	@Then("^I should be on CardPayment page$")
+	public void i_should_be_on_CardPayment_page() 
+    {
+		cardpayment = new CardPayment(driver);
+		currentPage = cardpayment;
+		
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("CardPayment_number")));	
+		
+	}
+	
+	@Then("^I should be on login page$")
+	public void i_should_be_on_log_in_page()
+    {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		sflogin = new SFLogin(driver);
+		currentPage = sflogin;
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("SFLogin_username")));
+	}
+	
+	@Then("^I should be on Confirmation page$")
+	public void i_should_be_on_Confirmation_page() 
+	{
+		
+		try {
+			Thread.sleep(15000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		
+		confirmation  = new Confirmation(driver);
+		currentPage = confirmation;
+
+		
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("Confirmation_total")));
+		WebElement sp = currentPage.get("Confirmation_order");
+		orid = sp.getText();
+
+	}
+
+	
+	@Then("^I select pay plan$")
+	public void i_select_pay_plan(DataTable tb) throws Throwable {
+		
+ 
+		
+		String type = Help.get2TableValue(tb, "type");
+		String plan = Help.get2TableValue(tb, "plan");
+		String pay = Help.get2TableValue(tb, "pay");
+		
+		WebElement typel = null;
+		
+		if(type.equals("Anytime"))
+		{
+			typel = currentPage.get("PayPlan_anytime");
+		}else
+		{
+			typel = currentPage.get("PayPlan_offpeak");
+		}
+		 
+		clickElement(typel);
+		
+		WebElement payel = null;
+		
+		if(pay.equals("Once"))
+		{
+			payel = currentPage.get("PayPlan_once");
+			DD = false;
+		}else
+		{
+			payel = currentPage.get("PayPlan_monthly");
+			DD = true;
+		}
+		
+	     clickElement(payel);
+	     
+	     WebElement plael = null;
+	     
+	     switch(plan)
+	     {
+	     case "12 months WB":
+	     {
+	    	 plael = currentPage.get("PayPlan_12monthsWB");
+	    	 break;
+	     }
+	     case "12 months":
+	     {
+	    	 plael = currentPage.get("PayPlan_12months");
+	    	 break;
+	     }
+	     
+	     }
+	     
+	     clickElement(plael);
+	}
+
 	
 	@Given ("^I navigate to salesforce$")
 	public void Given_I_navigate_to_salesforce()
 	{
 		driver.navigate().to(Cred.salesforce);
+	}
+	
+	@Then("^I should see all fields accurate$")
+	public void i_should_see_all_fields_accurate() throws Throwable {
+ 
+		sleep(5000);
+		
+		opportunityrecord = new OpportunityRecord(driver);
+		currentPage = opportunityrecord;
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("OpportunityRecord_site")));
+		
+		
+	}
+	
+	@Then("^I should be on PayPlan page$")
+	public void i_should_be_on_PayPlan_page() 
+	{
+		 payplan = new PayPlan(driver);
+		 currentPage = payplan;
+		 wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("PayPlan_basket")));
+	}
+	
+	@Then("^I search for my record$")
+	public void i_search_for_my_record()
+	{
+		sleep(5000);
+		opportunities = new Opportunities(driver);
+		currentPage = opportunities;
+		
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("Opportunities_go")));
+		currentPage.get("Opportunities_go").click();
+		sleep(3000);
+	}
+
+	
+	@When("^I fill in discount code \"([^\"]*)\"$")
+	public void i_fill_in_discount_code(String st)
+	{
+		WebElement el = currentPage.get("PayPlan_discount");
+		el.click();
+		WebElement iel = currentPage.get("PayPlan_code");
+		iel.clear();
+		iel.sendKeys(st);
+		WebElement ap = currentPage.get("PayPlan_apply");
+		ap.click();
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@When("^I log in$")
+	public void i_log_in()
+    {
+	  
+		WebElement user = currentPage.get("SFLogin_username");
+		user.clear();
+		user.sendKeys(Cred.Box.login);
+		
+		WebElement password = currentPage.get("SFLogin_password");
+		password.clear();
+		password.sendKeys(Cred.Box.password);
+		
+		WebElement submit = currentPage.get("SFLogin_login");
+		clickElement(submit);
+	}
+
+	
+	@When("^I do fill field \"([^\"]*)\" with \"([^\"]*)\"$")
+	public void i_do_fill_field_with(String fl, String vl) 
+	{
+		WebElement el = currentPage.get(fl);
+		el.sendKeys(vl);
 	}
 	
 	@When("^I fill number field \"([^\"]*)\" with \"([^\"]*)\"$")
@@ -252,6 +626,13 @@ public class LoginTest {
 		jse.executeScript("document.getElementById('"+fl+"').value='"+st+"';");
 		
 		
+	}
+	
+	@When("^I switch to Opportunities tab$")
+	public void i_switch_to_Opportunities_tab()
+	{
+		WebElement el = currentPage.get("SFLanding_opportunities");
+		clickElement(el);
 	}
 	
 	@When("^I click on link class \"([^\"]*)\"$")
@@ -410,11 +791,40 @@ public class LoginTest {
 	public void i_fill(String st)
 	{
 		
-		FieldSelector ele = new FieldSelector(st,driver);
+		FieldSelector ele = new FieldSelector(st,payplan);
 		WebElement el = ele.element;
 		el.sendKeys("test");
 		
 	}
+	
+	
+	@When("^I fill in card details$")
+	public void i_fill_in_card_details()
+	{
+		WebElement num = currentPage.get("CardPayment_number");
+		num.clear();
+		num.sendKeys(person.card); 
+		
+		WebElement month = currentPage.get("CardPayment_ExpirationMonth");
+		Select mon = new Select(month);
+		mon.selectByIndex(person.expMonth);
+		
+		
+		WebElement year = currentPage.get("CardPayment_ExpirationYear");
+		Select yer = new Select(year);
+		yer.selectByIndex(person.expYear);
+		
+		WebElement cod = currentPage.get("CardPayment_code");
+		cod.clear();
+		cod.sendKeys(person.code);
+		
+		WebElement pay = currentPage.get("CardPayment_pay");
+		clickElement(pay);
+		
+		
+	}
+
+
 	
 	@When("^I verify amount \"([^\"]*)\" is \"([^\"]*)\"$")
 	public void i_verify_amount_is(String fn, String st)
@@ -1653,6 +2063,29 @@ Date date = new Date();
 		driver.close();
 	}
 	
+	@When("^I do click \"([^\"]*)\"$")
+	public void i_do_click(String st)
+	{
+		WebElement el = payplan.get(st);
+		clickElement(el);
+		
+	}
+	
+	@Then("^I expand basket$")
+	public void i_expand_basket()
+	{
+		WebElement el = currentPage.get("PayPlan_basket");
+		clickElement(el);
+	}
+	
+	@Then("^I should be on PersonalDetails page$")
+	public void i_should_be_on_PersonalDetails_page()
+	{
+		personaldetails = new PersonalDetails(driver);
+		currentPage = personaldetails;
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("nameform")));
+		
+	}
 	
 	@When("^I click on basket$")
 	public void When_I_click_on_basket()
@@ -1753,6 +2186,20 @@ Date date = new Date();
 		
 	}
 	
+	@Then("^I should be on PaymentType page$")
+	public void i_should_be_on_PaymentType_page()
+    {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		paymenttype = new PaymentType(driver);
+		currentPage = paymenttype;
+
+	}
 	
 	@Then("^I wait for order id$")
 	public void Then_I_wait_for_order_id()
@@ -1797,6 +2244,93 @@ Date date = new Date();
 				}
 		}
 	}
+	
+	@When("^I set medical condition to \"([^\"]*)\"$")
+	public void i_set_medical_condition_to(String st) 
+    {
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			
+		}
+		WebElement condition = currentPage.get(st);
+		clickElement(condition);
+		
+	}
+
+	@When("^I agree to terms and conditions$")
+	public void i_agree_to_terms_and_conditions() 
+	{
+		WebElement el = currentPage.get("MemberSummary_Conditions");
+		clickElement(el);
+	}
+
+	
+	@When("^I populate personal details$")
+	public void i_populate_personal_details()
+	{
+		WebElement title = currentPage.get("PersonalDetails_title");
+		Select ttl = new Select(title);
+		ttl.selectByIndex(1);
+		
+		person = new Person(DD);
+		
+		WebElement first = currentPage.get("PersonalDetails_firstname");
+		first.clear();
+		first.sendKeys(person.firstName);
+		
+		WebElement last = currentPage.get("PersonalDetails_lastname");
+		last.clear();
+		last.sendKeys(person.lastName);
+		
+		WebElement day = currentPage.get("PersonalDetails_dobDay");
+		populateElement(day,person.dob_day);
+		
+		WebElement month = currentPage.get("PersonalDetails_dobMonth");
+		populateElement(month,person.dob_month);
+		
+		WebElement year = currentPage.get("PersonalDetails_dobYear");
+		populateElement(year,person.dob_year);
+		
+		WebElement gender = currentPage.get("PersonalDetails_gender");
+		Select gend = new Select(gender);
+		gend.selectByIndex(person.gender);
+		
+		WebElement house = currentPage.get("PersonalDetails_house");
+		house.clear();
+		house.sendKeys(person.house);
+		
+		WebElement postcode = currentPage.get("PersonalDetails_postcode");
+		postcode.clear();
+		postcode.sendKeys(person.postcode);
+		
+		WebElement lookup = currentPage.get("PersonalDetails_lookup");
+		lookup.click();
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 
+		WebElement email = currentPage.get("PersonalDetails_email");
+		email.clear();
+		email.sendKeys(person.email);
+		
+		WebElement email2 = currentPage.get("PersonalDetails_email2");
+		email2.clear();
+		email2.sendKeys(person.email);
+		
+		WebElement phone = currentPage.get("PersonalDetails_phone");
+		phone.clear();
+		phone.sendKeys(person.phone);
+		
+		WebElement mobile = currentPage.get("PersonalDetails_mobile");
+		mobile.clear();
+		mobile.sendKeys(person.phone);
+	}
+	
 	
 	@When ("I press button \"([^\"]*)\"$")
 	public void When_I_press_button(String bt)
@@ -1927,6 +2461,13 @@ Date date = new Date();
 		jse.executeScript("window.scrollBy(0,-250)", "");
 	}
 
+	
+	@When("^I select Visa payment$")
+	public void i_select_Visa_payment()
+    {
+		WebElement el = currentPage.get("PaymentType_visa");
+		clickElement(el);
+	}
 	
 	@When("^I scroll up\"([^\"]*)\"$")
 	public void When_I_scroll_up(String st)
@@ -2120,6 +2661,8 @@ Date date = new Date();
  
 	 
 	}
+	
+ 
 	
 	@When ("^I click on screen x  \"([^\"]*)\"$ y \"([^\"]*)\"$")
 	public void When_I_click_on_xy(String x,String y)
@@ -3342,6 +3885,8 @@ Date date = new Date();
 		executor.executeScript("arguments[0].value='"+st+"';", el);	
 	}
 	
+ 
+	
 	boolean isThing(String st)
 	{
 		boolean result = false;
@@ -3383,6 +3928,18 @@ Date date = new Date();
 	{
 		WebElement result = driver.findElement(By.xpath("a[text()='"+st+"']"));
 		return result;
+		
+	}
+	
+	private void sleep(long tm)
+	{
+		try {
+			Thread.sleep(tm);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 	}
 	
