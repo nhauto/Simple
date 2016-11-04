@@ -1,0 +1,45 @@
+<html xmlns:string="xalan://java.lang.String" xmlns:lxslt="http://xml.apache.org/xslt">
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Standard Output from TempRunner</title>
+</head>
+<body>
+<pre>Error was captured in field total to pay today 0.0does not match 42.4. Continue?
+null
+ready?
+null
+
+[31mFailed scenarios:[0m
+[31msrc/test/3months.feature:4 [0m# Scenario: Off peak  12 months current - Direct Debit - success
+
+1 Scenarios ([31m1 failed[0m)
+62 Steps ([31m1 failed[0m, [36m24 skipped[0m, [32m37 passed[0m)
+0m49.236s
+
+org.openqa.selenium.WebDriverException: document.getElementById(...) is null
+Command duration or timeout: 29 milliseconds
+Build info: version: '2.53.1', revision: 'a36b8b1cd5757287168e54b817830adce9b0158d', time: '2016-06-30 19:26:09'
+System info: host: 'NUFLCNU417CBJ1', ip: '10.152.2.174', os.name: 'Windows 7', os.arch: 'amd64', os.version: '6.1', java.version: '1.8.0_73'
+Driver info: org.openqa.selenium.firefox.FirefoxDriver
+Capabilities [{applicationCacheEnabled=true, rotatable=false, handlesAlerts=true, databaseEnabled=true, version=47.0.1, platform=WINDOWS, nativeEvents=false, acceptSslCerts=true, webStorageEnabled=true, locationContextEnabled=true, browserName=firefox, takesScreenshot=true, javascriptEnabled=true, cssSelectorsEnabled=true}]
+Session ID: 6a194fb3-66fb-4c4d-bcc0-7cda56fa3432
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+	at java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at org.openqa.selenium.remote.ErrorHandler.createThrowable(ErrorHandler.java:206)
+	at org.openqa.selenium.remote.ErrorHandler.throwIfResponseFailed(ErrorHandler.java:158)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:678)
+	at org.openqa.selenium.remote.RemoteWebDriver.executeScript(RemoteWebDriver.java:577)
+	at LoginTest.When_I_fill_number_field(LoginTest.java:156)
+	at ?.When I fill number field "direct_debit_account_details_form_account_number" with "40308669"(src/test/3months.feature:43)
+Caused by: org.openqa.selenium.WebDriverException: document.getElementById(...) is null
+Build info: version: '2.53.1', revision: 'a36b8b1cd5757287168e54b817830adce9b0158d', time: '2016-06-30 19:26:09'
+System info: host: 'NUFLCNU417CBJ1', ip: '10.152.2.174', os.name: 'Windows 7', os.arch: 'amd64', os.version: '6.1', java.version: '1.8.0_73'
+Driver info: driver.version: unknown
+	at &lt;anonymous class&gt;.anonymous(https://payments.nuffield.uat.fridayengineering.net/summary line 69 &gt; Function:1)
+	at &lt;anonymous class&gt;.handleEvaluateEvent(https://payments.nuffield.uat.fridayengineering.net/summary:69)
+
+</pre>
+</body>
+</html>
