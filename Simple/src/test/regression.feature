@@ -1,76 +1,41 @@
 Feature: Online Joining successfull flows
 
-Scenario: Anytime  12 months current - One Time Payment - success
+Scenario: OLJPLAIN01 Anytime  12 months current - One Time Payment
 
-Given I open the page "waf"
-Then I am on page "aber"
-When I click on fieldset element "choose_membership_package_form_payment_type_once"
-When I click on fieldset element "choose_membership_package_form_commitment_12"
-When I click on basket
-Then I wait
-Then I get amount value "total"
-Then I get amount "member"
-Then I grab amount "fee"
-Then I grab amount "prorata"
-Then I get amount "monthly"
-Then I can see all figures good "12"
-When I press button named "commit"
-Then I am on page "aber"
-When I select "Mr" in menu "personal_details_form_title"
-When I fill dynamic field "personal_details_form_first_name" with "firstname"
-When I fill dynamic field "personal_details_form_last_name" with "lastname"
-When I click on element with id "personal_details_form_date_of_birth_day"
-When I set to date "1/1/1970"
-When I select "Male" in menu "personal_details_form_gender"
-When I fill "housenumber" with "473"
-When I fill "postcode" with "IV448TZ"
-When I click on button name "btn"
-When I fill "mail" with "max.karpov@nuffieldhealth.com"
-When I fill "emailconfirmation" with "max.karpov@nuffieldhealth.com"
-When I fill "phone" with "07482716718"
-When I fill "mobile" with "07482716718"
-When I click on fieldset element "personal_details_form_unable_to_exercise_no"
-Then I wait
-When I press button named "commit"
-#Then I wait
-Then I am on page "aber"
-When I scroll down
-When I click on fieldset element "summary_form_marketing_email"
-When I scroll down "900"
-When I click on class "form__row form__row--limestone form__custom-check"
-#Then I wait
-When I click on button name "commit"
-Then I wait
-When I click on button name "VISA_brand"
-When I fill "cardname" with "xyz"
-When I fill "cardnumber" with "4111111111111111"
-When I select item "2" in menu "Ecom_Payment_Card_ExpDate_Month"
-When I select item "2" in menu "Ecom_Payment_Card_ExpDate_Year"
-When I fill "cardyear" with "2017"
-When I fill "cardcvs" with "737"
-#Then I wait
-When I click on button name "payment"
-Then I wait for order id
-#Then I wait
+Given I start "aberdeen"
+Then I should be on PayPlan page
+And I select pay plan
+|type | Anytime      |
+|plan | 12 months    |
+|pay  | Once         |
+And I expand basket
+Then I should see following values
+|membership| 781.0|
+|activation| 20   |
+When I proceed to next page
+Then I should be on PersonalDetails page
+When I populate personal details
+And I set medical condition to "PersonalDetails_UnableNo"
+And I proceed to next page
+Then I should be on MemberSummary page
+When I set marketing preferences to "MemberSummary_MarketingEmail"
+And I agree to terms and conditions
+And I proceed to payment
+Then I should be on PaymentType page
+When I select Visa payment
+Then I should be on CardPayment page
+When I fill in card details
+Then I should be on Confirmation page
 Given I navigate to salesforce
-When I enter Login and Password
-#Then I wait
-Then I should login to Salesforce
-When I switch to tab "Opportunities"
-Then I am on page "Opportunities"
-When I click on button name "go"
-Then I am on page "Opportunities"
-#When I click on opportunity
-Then I open opportunity
-Then I am on page "Opportunity"
-#Then I wait
-Then I can see "Site" filled with "Aberdeen"
-Then I can see "Amount" filled with "total"
-#Then I can see checked "00N8E000000Y1ux_chkbox"
-#When I click on contact link
-Then I can see "Order Reference" filled with "orid"
-Then I can see "Payment Reference" filled with "pay"
-Then I do save
+Then I should be on login page
+When I log in
+Then I am on SF Landing page
+When I switch to Opportunities tab
+Then I search for my record
+And I should see all fields accurate
+And I save results
+
+
 
 
 Scenario: Anytime  12 months Wellbeing current - One Time Payment - success

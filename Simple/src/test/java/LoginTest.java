@@ -50,12 +50,17 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import PageObjectModel.CardPayment;
 import PageObjectModel.Confirmation;
+import PageObjectModel.DDConfirm;
+import PageObjectModel.DDSetup;
+import PageObjectModel.DDSummary;
 import PageObjectModel.FieldSelector;
 import PageObjectModel.PayPlan;
 import PageObjectModel.PaymentType;
 import PageObjectModel.PersonalDetails;
 import PageObjectModel.SFLanding;
 import PageObjectModel.SFLogin;
+import PageObjectModel.ThankYou;
+import PageObjectModel.WebField;
 import PageObjectModel.MemberSummary;
 import PageObjectModel.Opportunities;
 import PageObjectModel.OpportunityRecord;
@@ -83,6 +88,7 @@ public class LoginTest {
 	protected String membership="";
 	protected String memcost="";
 	protected String prorata="";
+	protected String mysite;
 	protected String payref="";
 	protected String hidprorata;
 	protected String discount;
@@ -90,8 +96,11 @@ public class LoginTest {
 	protected String disc;
 	protected String next;
 	protected String hidnext;
+	protected String site;
+	protected String myamount;
 	protected boolean DD;
 	protected Scena scena;
+	private boolean postDD = false;
 	public boolean cutoff;
 	public PayPlan payplan;
 	public PersonalDetails personaldetails;
@@ -103,9 +112,12 @@ public class LoginTest {
 	public SFLanding sflanding;
 	public Opportunities opportunities;
 	public OpportunityRecord opportunityrecord;
-	
+	public DDConfirm ddconfirm;
+	public DDSetup ddsetup;
+	public DDSummary ddsummary;
+	public ThankYou thankyou;
 	protected Person person;
-	
+	protected Payment pay;
 	protected POM currentPage;
 	protected String[] vles = {"Next","Set up Direct Debit", "Proceed to payment","VISA_brand"};
 	protected String[] amounts={total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
@@ -130,6 +142,8 @@ public class LoginTest {
 	}
 	
 	
+	//actual givens
+	
 	@Given("^I open the test instance of salesforce$")
 	public void i_open_the_test_instance_of_salesforce()  {
 
@@ -147,7 +161,7 @@ public class LoginTest {
 	@Given("^I start ie \"([^\"]*)\"$")
 	public void i_start_ie(String st) throws Throwable
 	{
-		
+		site=Help.capitalize(st);
 		System.out.println("TEST STARTED IN IE: "+scenario.getName());
 		String path = Cred.waf+st;
 		System.setProperty("webdriver.ie.driver", "C:\\SeleniumDrivers\\IEDriverServer.exe");
@@ -163,7 +177,7 @@ public class LoginTest {
 	@Given("^I start chrome \"([^\"]*)\"$")
 	public void i_start_chrome(String st) throws Throwable
 	{
-		
+		site=Help.capitalize(st);
 		System.out.println("TEST STARTED IN CHROM: "+scenario.getName());
 		String path = Cred.waf+st;
 		System.setProperty("webdriver.chrome.driver", "C:\\SeleniumDrivers\\chromedriver.exe");
@@ -178,7 +192,7 @@ public class LoginTest {
 	@Given("^I start \"([^\"]*)\"$")
 	public void i_start(String st) throws Throwable
 	{
-		
+		site=Help.capitalize(st);
 		System.out.println("TEST STARTED: "+scenario.getName());
 		String path = Cred.waf+st;
 		
@@ -255,6 +269,68 @@ public class LoginTest {
 		 driver.manage().window().maximize();
 	}	
 	
+	//new Whens
+	
+	@Then("^I should be on DDSummary page$")
+	public void i_should_be_on_DDSummary_page() 
+    {
+			sleep(4000);
+			ddsummary = new DDSummary(driver);
+			currentPage = ddsummary;
+			
+			wait.until(ExpectedConditions.elementToBeClickable(currentPage.proceed));
+	}
+	
+	@Then("^I should be done setting DD$")
+	public void i_should_be_done_setting_DD() 
+	{
+		thankyou = new ThankYou(driver);
+		currentPage = thankyou;
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("ThankYou_next")));
+	}
+	
+	@When("^I continue to payment$")
+	public void i_continue_to_payment() 
+	{
+		WebElement el = currentPage.get("ThankYou_next");
+		clickElement(el);
+	}
+
+	
+	@When("^I enter bank details$")
+	public void i_enter_bank_details() 
+	{
+		WebElement acc = currentPage.get("DDSetup_account");
+		acc.clear();
+		populateElement(acc,person.getAccount());
+		
+		WebElement sc1 = currentPage.get("DDSetup_SortCode1");
+		sc1.clear();
+		populateElement(sc1,person.getSortCode()[0]);
+
+		WebElement sc2 = currentPage.get("DDSetup_SortCode2");
+		sc2.clear();
+		sc2.sendKeys(person.getSortCode()[1]);
+		WebElement sc3 = currentPage.get("DDSetup_SortCode3");
+		sc3.clear();
+		populateElement(sc3,person.getSortCode()[2]);
+		
+		WebElement hold = currentPage.get("DDSetup_holder");
+		hold.clear();
+		hold.sendKeys(person.firstName + " " + person.lastName);
+		
+		currentPage.proceed.click();
+		
+		
+	}
+	
+	@When("^I confirm details$")
+	public void i_confirm_details() 
+	{
+		WebElement el = currentPage.get("DDConfirm_confirm");
+		clickElement(el);
+	}
+	
 	@When("^I proceed to next page$")
 	public void i_proceed_to_next_page() 
 	{
@@ -273,11 +349,109 @@ public class LoginTest {
 	@When("^I proceed to payment$")
 	public void i_proceed_to_payment() 
     {
-		WebElement el = currentPage.get("MemberSummary_proceed");
+		String st = "MemberSummary_proceed";
+		if(DD&!postDD)
+		{
+			st = "MemberSummary_DD";
+		}
+		
+		
+		
+		WebElement el = currentPage.get(st);
 		clickElement(el);
 	}
 
+	@Then("^I save results$")
+	public void i_save_results() throws Throwable 
+	{
+		String[] temp=new String[11];
+		 
+		String url = driver.getCurrentUrl();
+		
+		String id=url.substring(Cred.salesforce.length());
+		
 	
+		
+		WebElement mel = (new Helper()).getCell(driver, "Membership Reference");
+		
+		membership = mel.getText();
+		
+		//total,membership,fee,prorata,monthly
+		//String[] capt=new String[10];
+		
+		String capt[] = {"scenario","forename","surname","total","monthly","fee","prorata","orid","payref","membership","id"};
+		
+		if(forename==null)
+		{
+			forename = "David";
+			surname = "Archer";
+		}
+		String monthly = "";
+		if(pay.getMontlyString()!=null)
+		{
+			monthly = pay.getMontlyString();
+		}
+		
+		temp[0] = scenario.getName();
+		temp[1] = person.firstName;
+		temp[2] = person.lastName;
+		temp[3] = myamount;
+		temp[4] = pay.getMontlyString();
+		temp[5] = pay.getFeeString();
+		temp[6] = pay.getProrataString();
+		temp[7] = orid;
+		temp[8] = payref;	
+		temp[9] = membership;
+		temp[10] = id;
+		
+		
+		
+		List<String[]> l = new ArrayList<>();
+		l.add(capt);
+		l.add(temp);
+		Helper help = new Helper();
+		
+		try {
+			help.writeResults(l);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("TEST COMPLETED: "+scenario.getName()+" STATUS: "+scenario.getStatus());
+		
+		if(!person.lastName.equals("Archer"))
+		{
+		help.writeFile("firstname", person.firstName);
+		help.writeFile("lastname", person.lastName);			
+		}
+
+		driver.close();
+	}
+
+	// New Thens
+	
+	@Then("^I should be on DDSetup page$")
+	public void i_should_be_on_DDSetup_page() 
+	{
+		sleep(3000);
+		ddsetup = new DDSetup(driver);
+		currentPage = ddsetup;
+		
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("DDSetup_account")));
+		
+	}
+	
+	
+	@Then("^I should be on DD page$")
+	public void i_should_be_on_DD_page()
+    {
+		sleep(3000);
+		ddconfirm = new DDConfirm(driver);
+		currentPage = ddconfirm;
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("DDConfirm_edit")));
+		
+	}
 	
 	@Then("^I should see following values$")
 	public void i_should_see_following_values(DataTable dt) 
@@ -288,7 +462,7 @@ public class LoginTest {
 			// TODO Auto-generated catch block
 			 
 		}
-		Payment pay = new Payment();
+		pay = new Payment();
 		String scn = scenario.getName();
 		Scena sc = new Scena(scn);
 		
@@ -369,11 +543,11 @@ public class LoginTest {
 		
 		Compare compro;
 		
-		if(sc.isROMF)
+		if(!sc.isROMF)
 		{
 			
 			compro = new Compare(pay.getProrataCost(),prorata,Compare.type.prorata);
-			comp.compare();
+			compro.compare();
 			
 		}else
 		{
@@ -382,9 +556,9 @@ public class LoginTest {
 
 		}
 		
-		Compare compfee = new Compare(pay.getFeeCost(),Double.parseDouble(Help.get2TableValue(dt, "activation")),Compare.type.fee);
-		compfee.compare();
-		
+			Compare compfee = new Compare(pay.getFeeCost(),Double.parseDouble(Help.get2TableValue(dt, "activation")),Compare.type.fee);
+			compfee.compare();
+			
 		
 		double expectedTotal = 0;
 		
@@ -550,8 +724,44 @@ public class LoginTest {
 		
 		opportunityrecord = new OpportunityRecord(driver);
 		currentPage = opportunityrecord;
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("OpportunityRecord_site")));
+		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("OpportunityRecord_stage")));
 		
+		String Amount =currentPage.get("OpportunityRecord_amount").getText();
+		myamount = Amount;
+		String Site = Help.getCell(driver, "Site").getText();
+		String Name = currentPage.get("OpportunityRecord_name").getText();
+		String Order = currentPage.get("OpportunityRecord_order").getText();
+		String Pay = currentPage.get("OpportunityRecord_payment").getText();
+		payref = Pay;
+		String Member = currentPage.get("OpportunityRecord_member").getText();
+		membership = Member;
+		String name = person.firstName+" "+person.lastName;
+		String amount = "";
+		
+		if(!DD)
+		{
+			amount = pay.getTotalString();
+		}else
+		{
+			amount = Double.toString((pay.getMonthlyCost()*12)+pay.getProrataCost()+pay.getFeeCost()+pay.getNextCost());
+		}
+		
+		Compare comp = new Compare(Amount,amount,Compare.type.amount);
+		comp.compare();
+		
+		//compareStrings(amount,Amount, "amount");
+		compareStrings(site,Site,"site");
+		compareStrings(orid,Order,"order id");
+		compareStrings(name,Name,"opportunity name");
+		
+		if(Member.length()<1)
+		{
+			System.out.println("Membership number not populated in SF");
+		}
+		if(Pay.length()<1)
+		{
+			System.out.println("Payment number not populated in SF");
+		}
 		
 	}
 	
@@ -573,6 +783,25 @@ public class LoginTest {
 		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("Opportunities_go")));
 		currentPage.get("Opportunities_go").click();
 		sleep(3000);
+		
+		WebElement opp = driver.findElement(By.xpath("//div[text()='"+orid+"']"));
+		
+		WebElement td = opp.findElement(By.xpath("parent::*"));
+		
+		WebElement tr = td.findElement(By.xpath("parent::*"));
+		
+		List<WebElement> ople = new ArrayList<>();
+		
+		ople = tr.findElements(By.tagName("td"));
+		
+		if(ople.size()>1)
+		{
+			WebElement op = ople.get(2).findElement(By.tagName("a"));
+			clickElement(op);
+		}
+		
+		
+		
 	}
 
 	
@@ -3943,4 +4172,11 @@ Date date = new Date();
 		
 	}
 	
+	private void compareStrings(String bsk,String ex,String tp)
+	{
+		if(!bsk.equals(ex))
+		{
+			interact("The value of "+tp+"("+bsk+") in the page doesn't match expected "+ex);
+		}
+	}
 }

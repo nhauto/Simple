@@ -4,7 +4,7 @@ import cucumber.api.junit.Cucumber;
 import cucumber.api.CucumberOptions;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(features="src/test/3months.feature")
+@CucumberOptions(features="src/test/mytest.feature")
 public class Runner {
 
 }
