@@ -7,26 +7,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.commons.codec.binary.Base64InputStream;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
-import com.google.common.io.Files;
 
 
 
@@ -157,8 +151,8 @@ public class Helper {
 	public String addDays(int ds)
 	{
 		String result=null;
-		Calendar cal=GregorianCalendar.getInstance();
-		cal.add(cal.DAY_OF_YEAR, ds);
+		Calendar cal=Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_YEAR, ds);
 		DateFormat fo=new SimpleDateFormat("dd/MM/yyyy");
 		Date da=cal.getTime();
 		result=fo.format(da);
@@ -296,7 +290,7 @@ public class Helper {
 		try {
 			range ar=range.valueOf(Range);
 			
-			Calendar cr=GregorianCalendar.getInstance();
+			Calendar cr=Calendar.getInstance();
 			Date da=new Date();
 			cr.setTime(da);
 			//String week=Integer.toString(cr.DAY_OF_MONTH)+"/"+Integer.toString(cr.MONTH)+"/"+Integer.toString(cr.YEAR);

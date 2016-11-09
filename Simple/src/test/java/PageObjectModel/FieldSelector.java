@@ -1,6 +1,5 @@
 package PageObjectModel;
 
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.lang.reflect.Field;

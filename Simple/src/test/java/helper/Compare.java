@@ -19,8 +19,8 @@ public enum type
 
 public Compare(double bsk,double exp,type tp)
 {
-	basket = bsk;
-	expected = exp;
+	basket = (double) Math.round(bsk * 100) / 100;;
+	expected = (double) Math.round(exp * 100) / 100;;
 	Type = tp; 
 }
 
@@ -36,7 +36,7 @@ public Compare(String bsk,String exp,type tp)
 	{
 		double result = -1;
 		
-			double res = Double.parseDouble(st.replace("£",""));
+			double res = Double.parseDouble(st.replace("£","").replace(",", ""));
 			result = (double) Math.round(res * 100) / 100;
 		
 		return result;

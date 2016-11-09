@@ -30,7 +30,7 @@ public class Sandbox {
 			waf = "https://payments.nuffield.qa.fridayengineering.net/join/aberdeen";
 			//waf = "https://payments.nuffield.qanext.fridayengineering.net/join/aberdeen";
 			login = "max.karpov@nuffieldhealth.com.crmqa";
-			password = "baraban234";
+			password = "baraban22";
 			
 			
 			break;

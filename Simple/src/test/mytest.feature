@@ -1,17 +1,17 @@
 Feature: my test
 
 
-Scenario: OLJPLAIN01 Anytime  12 months current - One Time Payment
+Scenario: OLJPLAIN02 Anytime  12 months WB current - One Time Payment
 
 Given I start "aberdeen"
 Then I should be on PayPlan page
 And I select pay plan
 |type | Anytime      |
-|plan | 12 months    |
+|plan | 12 months WB |
 |pay  | Once         |
 And I expand basket
 Then I should see following values
-|membership| 781.0|
+|membership| 869.0|
 |activation| 20   |
 When I proceed to next page
 Then I should be on PersonalDetails page
@@ -35,4 +35,3 @@ When I switch to Opportunities tab
 Then I search for my record
 And I should see all fields accurate
 And I save results
-

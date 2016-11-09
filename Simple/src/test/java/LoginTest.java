@@ -1,42 +1,24 @@
-import static org.junit.Assert.*;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import cucumber.api.java.Before;
-import org.openqa.selenium.Cookie;
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
- 
 
-import org.junit.Test;
+
+import org.junit.After;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
-
-import cucumber.api.DataTable;
-import cucumber.api.Scenario;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import helper.Compare;
-import helper.Helper;
-import helper.Person;
-import junit.framework.Assert;
-import main.java.Cred;
-
-import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -44,8 +26,10 @@ import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
+
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import PageObjectModel.CardPayment;
@@ -54,20 +38,29 @@ import PageObjectModel.DDConfirm;
 import PageObjectModel.DDSetup;
 import PageObjectModel.DDSummary;
 import PageObjectModel.FieldSelector;
+import PageObjectModel.MemberSummary;
+import PageObjectModel.Opportunities;
+import PageObjectModel.OpportunityRecord;
+import PageObjectModel.POM;
 import PageObjectModel.PayPlan;
 import PageObjectModel.PaymentType;
 import PageObjectModel.PersonalDetails;
 import PageObjectModel.SFLanding;
 import PageObjectModel.SFLogin;
 import PageObjectModel.ThankYou;
-import PageObjectModel.WebField;
-import PageObjectModel.MemberSummary;
-import PageObjectModel.Opportunities;
-import PageObjectModel.OpportunityRecord;
-import PageObjectModel.POM;
-
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
+import cucumber.api.DataTable;
+import cucumber.api.Scenario;
+import cucumber.api.java.Before;
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+import helper.Compare;
+import helper.Helper;
+import helper.Payment;
+import helper.Person;
+import helper.Scena;
+import junit.framework.Assert;
+import main.java.Cred;
 
 public class LoginTest {
 
@@ -121,7 +114,7 @@ public class LoginTest {
 	protected POM currentPage;
 	protected String[] vles = {"Next","Set up Direct Debit", "Proceed to payment","VISA_brand"};
 	protected String[] amounts={total,membership,fee,prorata,monthly,hidprorata,hidfee,disc,next,hidnext};
-	
+	private int errorCount = 0;
 	List<String> vals = new ArrayList<>();
 	public Scenario scenario;
 	
@@ -154,7 +147,7 @@ public class LoginTest {
 		driver=new FirefoxDriver(Binary,fprofile);
 		
 		wait=new WebDriverWait(driver,45);			
-		 driver.get(Cred.salesforce);
+		 driver.get(main.java.Cred.salesforce);
 		 driver.manage().window().maximize();
 	}
 	
@@ -163,7 +156,7 @@ public class LoginTest {
 	{
 		site=Help.capitalize(st);
 		System.out.println("TEST STARTED IN IE: "+scenario.getName());
-		String path = Cred.waf+st;
+		String path = main.java.Cred.waf+st;
 		System.setProperty("webdriver.ie.driver", "C:\\SeleniumDrivers\\IEDriverServer.exe");
 		driver = new InternetExplorerDriver();	
 		
@@ -277,8 +270,8 @@ public class LoginTest {
 			sleep(4000);
 			ddsummary = new DDSummary(driver);
 			currentPage = ddsummary;
-			
-			wait.until(ExpectedConditions.elementToBeClickable(currentPage.proceed));
+			doWait("proceed");
+	//		wait.until(ExpectedConditions.elementToBeClickable(currentPage.proceed));
 	}
 	
 	@Then("^I should be done setting DD$")
@@ -286,7 +279,8 @@ public class LoginTest {
 	{
 		thankyou = new ThankYou(driver);
 		currentPage = thankyou;
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("ThankYou_next")));
+		doWait("ThankYou_next");
+	//	wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("ThankYou_next")));
 	}
 	
 	@When("^I continue to payment$")
@@ -318,7 +312,7 @@ public class LoginTest {
 		WebElement hold = currentPage.get("DDSetup_holder");
 		hold.clear();
 		hold.sendKeys(person.firstName + " " + person.lastName);
-		
+		postDD = true;
 		currentPage.proceed.click();
 		
 		
@@ -350,11 +344,16 @@ public class LoginTest {
 	public void i_proceed_to_payment() 
     {
 		String st = "MemberSummary_proceed";
-		if(DD&!postDD)
+		if(DD&&postDD)
 		{
-			st = "MemberSummary_DD";
+			st = "ThankYou_next";
+		}else
+		{
+			if(DD)
+			{
+				st = "MemberSummary_DD";
+			}
 		}
-		
 		
 		
 		WebElement el = currentPage.get(st);
@@ -368,7 +367,7 @@ public class LoginTest {
 		 
 		String url = driver.getCurrentUrl();
 		
-		String id=url.substring(Cred.salesforce.length());
+		String id=url.substring(main.java.Cred.salesforce.length());
 		
 	
 		
@@ -449,7 +448,9 @@ public class LoginTest {
 		sleep(3000);
 		ddconfirm = new DDConfirm(driver);
 		currentPage = ddconfirm;
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("DDConfirm_edit")));
+		
+		doWait("DDConfirm_edit");
+	//	wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("DDConfirm_edit")));
 		
 	}
 	
@@ -588,7 +589,8 @@ public class LoginTest {
  
 		membersummary = new MemberSummary(driver);
 		currentPage = membersummary;
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("MemberSummary_MarketingEmail")));
+		doWait("MemberSummary_MarketingEmail");
+		//wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("MemberSummary_MarketingEmail")));
 		
 	}
 	
@@ -614,8 +616,8 @@ public class LoginTest {
     {
 		cardpayment = new CardPayment(driver);
 		currentPage = cardpayment;
-		
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("CardPayment_number")));	
+		doWait("CardPayment_number");
+	//	wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("CardPayment_number")));	
 		
 	}
 	
@@ -630,25 +632,21 @@ public class LoginTest {
 		}
 		sflogin = new SFLogin(driver);
 		currentPage = sflogin;
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("SFLogin_username")));
+		doWait("SFLogin_username");
+	//	wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("SFLogin_username")));
 	}
 	
 	@Then("^I should be on Confirmation page$")
 	public void i_should_be_on_Confirmation_page() 
 	{
 		
-		try {
-			Thread.sleep(15000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+		sleep(15000);
 		
 		confirmation  = new Confirmation(driver);
 		currentPage = confirmation;
 
-		
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("Confirmation_total")));
+		doWait("Confirmation_order");
+		//wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("Confirmation_total")));
 		WebElement sp = currentPage.get("Confirmation_order");
 		orid = sp.getText();
 
@@ -675,6 +673,7 @@ public class LoginTest {
 		}
 		 
 		clickElement(typel);
+		sleep(1000);
 		
 		WebElement payel = null;
 		
@@ -689,7 +688,7 @@ public class LoginTest {
 		}
 		
 	     clickElement(payel);
-	     
+	     sleep(1000);
 	     WebElement plael = null;
 	     
 	     switch(plan)
@@ -714,13 +713,13 @@ public class LoginTest {
 	@Given ("^I navigate to salesforce$")
 	public void Given_I_navigate_to_salesforce()
 	{
-		driver.navigate().to(Cred.salesforce);
+		driver.navigate().to(main.java.Cred.salesforce);
 	}
 	
 	@Then("^I should see all fields accurate$")
 	public void i_should_see_all_fields_accurate() throws Throwable {
  
-		sleep(5000);
+		sleep(15000);
 		
 		opportunityrecord = new OpportunityRecord(driver);
 		currentPage = opportunityrecord;
@@ -770,7 +769,8 @@ public class LoginTest {
 	{
 		 payplan = new PayPlan(driver);
 		 currentPage = payplan;
-		 wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("PayPlan_basket")));
+		 doWait("PayPlan_basket");
+	//	 wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("PayPlan_basket")));
 	}
 	
 	@Then("^I search for my record$")
@@ -784,6 +784,7 @@ public class LoginTest {
 		currentPage.get("Opportunities_go").click();
 		sleep(3000);
 		
+		waitText(orid);
 		WebElement opp = driver.findElement(By.xpath("//div[text()='"+orid+"']"));
 		
 		WebElement td = opp.findElement(By.xpath("parent::*"));
@@ -829,7 +830,7 @@ public class LoginTest {
 	  
 		WebElement user = currentPage.get("SFLogin_username");
 		user.clear();
-		user.sendKeys(Cred.Box.login);
+		user.sendKeys(main.java.Cred.Box.login);
 		
 		WebElement password = currentPage.get("SFLogin_password");
 		password.clear();
@@ -907,8 +908,8 @@ public class LoginTest {
 		WebElement lo = driver.findElement(By.id("username"));
 		WebElement pa = driver.findElement(By.id("password"));
 		
-		populateElement(lo,Cred.max.Login);
-		populateElement(pa,Cred.max.Password);
+		populateElement(lo,main.java.Cred.max.Login);
+		populateElement(pa,main.java.Cred.max.Password);
 		
 	//	driver.findElement(By.id("username")).sendKeys(Cred.max.Login);
 	//	driver.findElement(By.id("password")).sendKeys(Cred.max.Password);
@@ -1897,7 +1898,7 @@ Date date = new Date();
 		boolean monthlyOK = false;
 		boolean proOK = false;
 		boolean totalOK = false;
-		double annual = (double) Math.round(mon*m);
+		double annual = Math.round(mon*m);
 
 		
 		if(mem == annual)
@@ -2246,7 +2247,7 @@ Date date = new Date();
 		 
 		String url = driver.getCurrentUrl();
 		
-		String id=url.substring(Cred.salesforce.length());
+		String id=url.substring(main.java.Cred.salesforce.length());
 		
 		//WebElement mel = driver.findElement(By.id("00N8E000000e9lj_ileinner"));
 		
@@ -2312,7 +2313,8 @@ Date date = new Date();
 	{
 		personaldetails = new PersonalDetails(driver);
 		currentPage = personaldetails;
-		wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("nameform")));
+	doWait("nameform");
+		//	wait.until(ExpectedConditions.elementToBeClickable(currentPage.get("nameform")));
 		
 	}
 	
@@ -2477,11 +2479,7 @@ Date date = new Date();
 	@When("^I set medical condition to \"([^\"]*)\"$")
 	public void i_set_medical_condition_to(String st) 
     {
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			
-		}
+		sleep(15000);
 		WebElement condition = currentPage.get(st);
 		clickElement(condition);
 		
@@ -4140,7 +4138,7 @@ Date date = new Date();
 		Double S1 = (double) Math.round(s1 * 100) / 100;
 		Double S2 = (double) Math.round(s2 * 100) / 100;
 		
-		int co =(Integer)Double.compare(S1, S2);
+		int co =Double.compare(S1, S2);
 		
 		if(co!=0)
 		{
@@ -4179,4 +4177,38 @@ Date date = new Date();
 			interact("The value of "+tp+"("+bsk+") in the page doesn't match expected "+ex);
 		}
 	}
+	
+	private void doWait(String st)
+	{
+		sleep(5000);
+		 
+		try {
+			wait.until(ExpectedConditions.elementToBeClickable(currentPage.get(st)));
+	 
+		} catch (NoSuchElementException | TimeoutException e) {
+			
+			if(errorCount<15)
+			{
+				doWait(st);
+			}
+		}
+		
+	}
+	
+	private void waitText(String st)
+	{
+		sleep(5000);
+		 
+		try {
+			wait.equals(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='"+st+"']")));
+		} catch (NoSuchElementException | TimeoutException e) {
+			
+			if(errorCount<15)
+			{
+				waitText(st);
+			}
+		}
+		
+	}
 }
+
